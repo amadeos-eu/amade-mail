@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=amadeOS Mailer
+GenericName=Mail Client
+Comment=CDE-style IMAP and SMTP mail client
+Icon=amade-mail
+Exec=/usr/bin/amade-mail %u
+Terminal=false
+Categories=Network;Email;
+MimeType=x-scheme-handler/mailto;
+Keywords=mail;email;imap;smtp;
+StartupNotify=true
