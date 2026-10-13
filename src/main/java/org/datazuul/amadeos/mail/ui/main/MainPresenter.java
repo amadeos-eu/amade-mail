@@ -300,10 +300,15 @@ public final class MainPresenter implements MessageViewActions {
                 }, edt);
     }
 
+    /**
+     * @param total message count from the folder tree; it may be stale, so it is only mentioned when the
+     *              list was actually cut off at {@link #MESSAGE_LIMIT}
+     */
     static String loadedStatus(List<MessageSummary> messages, int total) {
         long unread = messages.stream().filter(m -> !m.seen()).count();
         String text = "Loaded " + messages.size() + " messages, " + unread + " new";
-        return total > messages.size() ? text + " (newest " + messages.size() + " of " + total + ")" : text;
+        boolean truncated = messages.size() >= MESSAGE_LIMIT && total > messages.size();
+        return truncated ? text + " (newest " + messages.size() + " of " + total + ")" : text;
     }
 
     public void checkMail() {
