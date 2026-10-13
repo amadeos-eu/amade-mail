@@ -2,7 +2,7 @@ package org.datazuul.amadeos.mail.ui.options;
 
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.MailPreferences;
-import org.datazuul.amadeos.mail.ui.swing.AmadeUI;
+import org.datazuul.amadeos.commons.swing.AmadeUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,7 +31,6 @@ public final class OptionsDialog extends JDialog {
         super(owner, "Mailer - Mail Options", true);
         accounts = new AccountsPanel(tester);
         JPanel content = new JPanel(new BorderLayout(0, 10));
-        content.setBackground(AmadeUI.BASE);
         content.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
 
         JPanel top = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));

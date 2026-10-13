@@ -3,7 +3,7 @@ package org.datazuul.amadeos.mail.ui.view;
 import org.datazuul.amadeos.mail.domain.MessageContent;
 import org.datazuul.amadeos.mail.domain.MessageContent.Attachment;
 import org.datazuul.amadeos.mail.ui.messages.MessageTableModel;
-import org.datazuul.amadeos.mail.ui.swing.AmadeUI;
+import org.datazuul.amadeos.commons.swing.AmadeUI;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
@@ -35,11 +35,10 @@ public final class MessageViewPanel extends JPanel {
         super(new BorderLayout(0, 4));
         this.actions = actions;
         this.html = new HtmlMessagePane(actions::linkClicked);
-        setBackground(AmadeUI.BASE);
 
-        headers.setBackground(Color.WHITE);
+        AmadeUI.style(headers, (panel, theme) -> panel.setBackground(theme.fieldBackground()));
         headers.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
-        remoteBar.setBackground(AmadeUI.SOFT_HIGHLIGHT);
+        AmadeUI.style(remoteBar, (panel, theme) -> panel.setBackground(theme.softHighlight()));
         remoteBar.add(remoteLabel);
         JButton once = new JButton("Load images");
         once.addActionListener(e -> actions.loadRemoteImagesOnce());
@@ -65,7 +64,7 @@ public final class MessageViewPanel extends JPanel {
         body.add(html, "html");
         body.setBorder(AmadeUI.sunken());
 
-        attachmentBar.setBackground(Color.WHITE);
+        AmadeUI.style(attachmentBar, (panel, theme) -> panel.setBackground(theme.fieldBackground()));
         attachmentBar.setBorder(BorderFactory.createCompoundBorder(AmadeUI.sunken(),
                 BorderFactory.createEmptyBorder(2, 8, 2, 8)));
         JLabel attachmentTitle = new JLabel("Attachments");
@@ -150,7 +149,7 @@ public final class MessageViewPanel extends JPanel {
         c.anchor = GridBagConstraints.FIRST_LINE_START;
         c.insets = new Insets(1, 0, 1, 8);
         JLabel l = new JLabel(label);
-        l.setForeground(AmadeUI.TEXT_INACTIVE);
+        AmadeUI.style(l, (headerLabel, theme) -> headerLabel.setForeground(theme.textInactive()));
         l.setFont(l.getFont().deriveFont(Font.PLAIN));
         headers.add(l, c);
         c.gridx = 1;
@@ -160,7 +159,8 @@ public final class MessageViewPanel extends JPanel {
         JTextField v = new JTextField(value);
         v.setEditable(false);
         v.setBorder(BorderFactory.createEmptyBorder());
-        v.setBackground(Color.WHITE);
+        // Read-only fields would get the panel colour; they sit on the white header block.
+        AmadeUI.style(v, (field, theme) -> field.setBackground(theme.fieldBackground()));
         v.setFont(v.getFont().deriveFont("Subject:".equals(label) ? Font.BOLD : Font.PLAIN));
         v.setCaretPosition(0);
         headers.add(v, c);

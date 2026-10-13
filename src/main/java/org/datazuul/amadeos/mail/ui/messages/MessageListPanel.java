@@ -1,8 +1,8 @@
 package org.datazuul.amadeos.mail.ui.messages;
 
 import org.datazuul.amadeos.mail.domain.MessageSummary;
-import org.datazuul.amadeos.mail.ui.common.EdtExecutor;
-import org.datazuul.amadeos.mail.ui.swing.AmadeUI;
+import org.datazuul.amadeos.commons.swing.EdtExecutor;
+import org.datazuul.amadeos.commons.swing.AmadeUI;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -32,7 +32,6 @@ public final class MessageListPanel extends JPanel {
 
     public MessageListPanel() {
         super(new BorderLayout());
-        setBackground(AmadeUI.BASE);
 
         table.setFillsViewportHeight(true);
         table.setShowVerticalLines(false);
@@ -55,9 +54,8 @@ public final class MessageListPanel extends JPanel {
 
         JScrollPane scroll = new JScrollPane(table);
         scroll.setBorder(AmadeUI.sunken());
-        scroll.getViewport().setBackground(Color.WHITE);
+        AmadeUI.style(scroll.getViewport(), (viewport, theme) -> viewport.setBackground(theme.fieldBackground()));
         add(scroll, BorderLayout.CENTER);
-        buttons.setBackground(AmadeUI.BASE);
         add(buttons, BorderLayout.SOUTH);
     }
 

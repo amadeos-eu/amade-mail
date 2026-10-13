@@ -10,7 +10,7 @@ import org.datazuul.amadeos.mail.domain.MessageContent.Attachment;
 import org.datazuul.amadeos.mail.domain.MessageSummary;
 import org.datazuul.amadeos.mail.domain.OutgoingMessage;
 import org.datazuul.amadeos.mail.repository.AccountRepository;
-import org.datazuul.amadeos.mail.repository.PasswordStore;
+import org.datazuul.amadeos.commons.desktop.PasswordStore;
 import org.datazuul.amadeos.mail.repository.PreferencesRepository;
 import org.datazuul.amadeos.mail.service.CredentialProvider;
 import org.datazuul.amadeos.mail.service.HtmlSanitizer;
@@ -21,7 +21,7 @@ import org.datazuul.amadeos.mail.service.MailtoLink;
 import org.datazuul.amadeos.mail.service.MessageComposer;
 import org.datazuul.amadeos.mail.service.RemoteImageLoader;
 import org.datazuul.amadeos.mail.service.SentCopyFailedException;
-import org.datazuul.amadeos.mail.ui.common.DesktopLauncher;
+import org.datazuul.amadeos.commons.desktop.DesktopLauncher;
 import org.datazuul.amadeos.mail.ui.compose.ComposeWindow;
 import org.datazuul.amadeos.mail.ui.compose.Draft;
 import org.datazuul.amadeos.mail.ui.folders.AccountState;
@@ -92,7 +92,7 @@ public final class MainPresenter implements MessageViewActions {
                          PreferencesRepository preferencesRepository, PasswordStore passwordStore,
                          CredentialProvider credentials, HtmlSanitizer sanitizer, RemoteImageLoader remoteImages,
                          DesktopLauncher desktop, ExecutorService executor,
-                         org.datazuul.amadeos.mail.ui.common.EdtExecutor edt) {
+                         org.datazuul.amadeos.commons.swing.EdtExecutor edt) {
         this.view = view;
         this.gateway = gateway;
         this.accountRepository = accountRepository;

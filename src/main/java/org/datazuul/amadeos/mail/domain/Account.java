@@ -5,7 +5,7 @@ import java.util.UUID;
 
 /**
  * One configured mail account. The password is not part of the account; it lives in the
- * {@link org.datazuul.amadeos.mail.repository.PasswordStore}.
+ * {@link org.datazuul.amadeos.commons.desktop.PasswordStore}.
  *
  * @param id          stable identifier, used as key in the config file and the keyring
  * @param name        label shown in the folder tree, e.g. "Privat"

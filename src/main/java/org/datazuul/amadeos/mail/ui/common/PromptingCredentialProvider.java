@@ -2,7 +2,7 @@ package org.datazuul.amadeos.mail.ui.common;
 
 import com.google.inject.Inject;
 import org.datazuul.amadeos.mail.domain.Account;
-import org.datazuul.amadeos.mail.repository.PasswordStore;
+import org.datazuul.amadeos.commons.desktop.PasswordStore;
 import org.datazuul.amadeos.mail.service.CredentialProvider;
 import org.datazuul.amadeos.mail.service.MailServiceException;
 

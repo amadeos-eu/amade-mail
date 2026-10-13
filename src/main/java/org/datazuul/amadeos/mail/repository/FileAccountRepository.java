@@ -1,6 +1,8 @@
 package org.datazuul.amadeos.mail.repository;
 
 import com.google.inject.Inject;
+import org.datazuul.amadeos.commons.config.AppDirectories;
+import org.datazuul.amadeos.commons.config.PropertiesFile;
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.AccountColor;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
@@ -32,8 +34,8 @@ public final class FileAccountRepository implements AccountRepository {
     private final Path file;
 
     @Inject
-    public FileAccountRepository(ConfigDirectory directory) {
-        this(directory.resolve(FILE_NAME));
+    public FileAccountRepository(AppDirectories directories) {
+        this(directories.configFile(FILE_NAME));
     }
 
     FileAccountRepository(Path file) {

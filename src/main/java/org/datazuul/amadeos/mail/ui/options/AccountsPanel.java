@@ -5,7 +5,7 @@ import org.datazuul.amadeos.mail.domain.AccountColor;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
 import org.datazuul.amadeos.mail.domain.ServerSettings;
 import org.datazuul.amadeos.mail.service.ServerGuesser;
-import org.datazuul.amadeos.mail.ui.swing.AmadeUI;
+import org.datazuul.amadeos.commons.swing.AmadeUI;
 
 import javax.swing.*;
 import java.awt.*;

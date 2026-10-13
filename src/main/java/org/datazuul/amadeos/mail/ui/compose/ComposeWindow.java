@@ -2,7 +2,7 @@ package org.datazuul.amadeos.mail.ui.compose;
 
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.OutgoingMessage;
-import org.datazuul.amadeos.mail.ui.swing.AmadeUI;
+import org.datazuul.amadeos.commons.swing.AmadeUI;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
@@ -112,14 +112,12 @@ public final class ComposeWindow extends JFrame {
         south.add(attachmentScroll, BorderLayout.NORTH);
         south.add(buttons, BorderLayout.CENTER);
         JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
-        statusBar.setBackground(AmadeUI.BASE);
         statusBar.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         status.setFont(status.getFont().deriveFont(Font.PLAIN, 11f));
         statusBar.add(status);
         south.add(statusBar, BorderLayout.SOUTH);
 
         JPanel content = new JPanel(new BorderLayout(0, 6));
-        content.setBackground(AmadeUI.BASE);
         content.setBorder(BorderFactory.createEmptyBorder(6, 8, 0, 8));
         content.add(fields, BorderLayout.NORTH);
         content.add(bodyScroll, BorderLayout.CENTER);

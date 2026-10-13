@@ -4,14 +4,14 @@ import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.MailPreferences;
 import org.datazuul.amadeos.mail.domain.MessageContent.Attachment;
 import org.datazuul.amadeos.mail.domain.MessageSummary;
-import org.datazuul.amadeos.mail.ui.common.EdtExecutor;
+import org.datazuul.amadeos.commons.swing.EdtExecutor;
 import org.datazuul.amadeos.mail.ui.compose.ComposeWindow;
 import org.datazuul.amadeos.mail.ui.compose.Draft;
 import org.datazuul.amadeos.mail.ui.folders.AccountState;
 import org.datazuul.amadeos.mail.ui.folders.FolderTreePanel;
 import org.datazuul.amadeos.mail.ui.messages.MessageListPanel;
 import org.datazuul.amadeos.mail.ui.options.OptionsDialog;
-import org.datazuul.amadeos.mail.ui.swing.AmadeUI;
+import org.datazuul.amadeos.commons.swing.AmadeUI;
 import org.datazuul.amadeos.mail.ui.view.DisplayedMessage;
 import org.datazuul.amadeos.mail.ui.view.MessageViewActions;
 import org.datazuul.amadeos.mail.ui.view.MessageViewPanel;
@@ -88,13 +88,11 @@ public final class MainWindow extends JFrame implements MainView {
         horizontal.setDividerLocation(dividerLocation);
 
         JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 3));
-        statusBar.setBackground(AmadeUI.BASE);
         statusBar.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
         status.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 11));
         statusBar.add(status);
 
         JPanel content = new JPanel(new BorderLayout());
-        content.setBackground(AmadeUI.BASE);
         content.add(horizontal, BorderLayout.CENTER);
         content.add(statusBar, BorderLayout.SOUTH);
         setContentPane(content);

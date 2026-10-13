@@ -2,8 +2,8 @@ package org.datazuul.amadeos.mail.ui.folders;
 
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.MailFolder;
-import org.datazuul.amadeos.mail.ui.common.EdtExecutor;
-import org.datazuul.amadeos.mail.ui.swing.AmadeUI;
+import org.datazuul.amadeos.commons.swing.EdtExecutor;
+import org.datazuul.amadeos.commons.swing.AmadeUI;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -33,7 +33,6 @@ public final class FolderTreePanel extends JPanel {
 
     public FolderTreePanel() {
         super(new BorderLayout(0, 3));
-        setBackground(AmadeUI.BASE);
         JLabel title = new JLabel("Folders");
         title.setFont(title.getFont().deriveFont(Font.PLAIN, 11f));
         add(title, BorderLayout.NORTH);
@@ -172,7 +171,7 @@ public final class FolderTreePanel extends JPanel {
                 case TreeItem.FolderItem f -> {
                     setIcon(null);
                     setToolTipText(f.folder().total() >= 0 ? f.folder().total() + " messages" : null);
-                    if (!f.folder().selectable() && !selected) setForeground(AmadeUI.TEXT_INACTIVE);
+                    if (!f.folder().selectable() && !selected) setForeground(AmadeUI.theme().textInactive());
                 }
                 case TreeItem.UnifiedInbox u -> {
                     setIcon(null);

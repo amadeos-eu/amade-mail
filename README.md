@@ -79,16 +79,18 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
 
 ## Architecture
 
-Java 21, Swing, Guice; same structure as [amade-pad](https://github.com/datazuul/amade-pad).
+Java 21, Swing, Guice; same structure as [amade-pad](https://github.com/datazuul/amade-pad). Theme, Motif
+look, start-up, keyring and XDG helpers come from
+[amade-commons](https://github.com/datazuul/amade-commons), so the Mailer follows the desktop theme
+chosen in the Style Manager immediately, including *Dark Slate*.
 
 | Package | Content |
 |---|---|
 | `domain` | `Account`, `ServerSettings`, `MailFolder`, `FolderRole`, `MessageSummary`, `MessageContent`, `OutgoingMessage`, `MailPreferences` |
-| `repository` | `FileAccountRepository`, `PreferencesRepository`, `SecretToolPasswordStore` |
+| `repository` | `FileAccountRepository`, `PreferencesRepository` (passwords: `PasswordStore` from amade-commons) |
 | `service` | `MailGateway` / `JakartaMailGateway` (IMAP + SMTP on Jakarta Mail / Eclipse Angus), `MessageParser`, `MessageComposer`, `HtmlSanitizer`, `RemoteImageLoader`, `ServerGuesser`, `MailtoLink` |
 | `ui.main` | `MainWindow`, `MainMenuBar`, `MainPresenter` (all behaviour, testable without Swing windows) |
 | `ui.folders`, `ui.messages`, `ui.view`, `ui.options`, `ui.compose` | folder column, header list, message view, Mail Options, compose window |
-| `ui.swing` | `AmadeUI`, the amadeOS Motif look |
 
 `JakartaMailGateway` keeps one IMAP connection per account. Operations on one account are
 serialised, different accounts run in parallel on virtual threads, so a slow or unreachable server
@@ -98,6 +100,9 @@ the user selected something else are dropped.
 ## Building and testing
 
 Requirements: Java 21 JDK; `dpkg-deb` for the Debian package.
+
+`amade-commons` is taken from JitPack. If it is checked out next to this repository
+(`../amade-commons`), Gradle builds that checkout instead, so changes to both can be tested together.
 
 ```bash
 ./gradlew test                 # unit tests (presenter tests need a display or Xvfb)
