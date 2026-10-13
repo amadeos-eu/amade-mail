@@ -16,9 +16,11 @@ import java.util.UUID;
  * @param smtp        outgoing server
  * @param signature   appended to new messages, may be empty
  * @param color       index into {@link AccountColor}
+ * @param auth        password or OAuth2 login; OAuth2 tokens also live in the keyring
  */
 public record Account(String id, String name, String displayName, String email, String username,
-                      ServerSettings imap, ServerSettings smtp, String signature, AccountColor color) {
+                      ServerSettings imap, ServerSettings smtp, String signature, AccountColor color,
+                      AuthMethod auth) {
 
     public Account {
         Objects.requireNonNull(id, "id");
@@ -33,6 +35,13 @@ public record Account(String id, String name, String displayName, String email, 
         Objects.requireNonNull(imap, "imap");
         Objects.requireNonNull(smtp, "smtp");
         color = color == null ? AccountColor.BLUE : color;
+        auth = auth == null ? AuthMethod.PASSWORD : auth;
+    }
+
+    /** An account that logs in with a password. */
+    public Account(String id, String name, String displayName, String email, String username,
+                   ServerSettings imap, ServerSettings smtp, String signature, AccountColor color) {
+        this(id, name, displayName, email, username, imap, smtp, signature, color, AuthMethod.PASSWORD);
     }
 
     public static String newId() {

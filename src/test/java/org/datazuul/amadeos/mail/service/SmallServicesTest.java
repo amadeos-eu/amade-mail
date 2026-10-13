@@ -1,5 +1,6 @@
 package org.datazuul.amadeos.mail.service;
 
+import org.datazuul.amadeos.mail.domain.AuthMethod;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
 import org.datazuul.amadeos.mail.domain.ServerSettings;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,11 @@ class SmallServicesTest {
         assertEquals(new ServerSettings("imap.datazuul.com", 993, ConnectionSecurity.TLS), other.imap());
         assertEquals(new ServerSettings("smtp.datazuul.com", 587, ConnectionSecurity.STARTTLS), other.smtp());
 
+        assertEquals(AuthMethod.PASSWORD, other.auth());
+        ServerGuesser.Guess gmail = guesser.guess("ralf@gmail.com").orElseThrow();
+        assertEquals(AuthMethod.OAUTH2_GOOGLE, gmail.auth());
+        assertEquals("ralf@gmail.com", gmail.username());
+
         assertTrue(guesser.guess("no-at-sign").isEmpty());
         assertTrue(guesser.guess("trailing@").isEmpty());
     }
@@ -63,5 +69,17 @@ class SmallServicesTest {
         assertEquals("true", p.getProperty("mail.smtp.starttls.enable"));
         assertEquals("true", p.getProperty("mail.smtp.starttls.required"));
         assertEquals("true", p.getProperty("mail.smtp.auth"));
+    }
+
+    @Test
+    void oauth2UsesOnlyXoauth2() {
+        ServerSettings imap = new ServerSettings("imap.gmail.com", 993, ConnectionSecurity.TLS);
+        Properties p = MailSessions.imapProperties(imap, AuthMethod.OAUTH2_GOOGLE);
+        assertEquals("XOAUTH2", p.getProperty("mail.imaps.auth.mechanisms"));
+        assertEquals("true", p.getProperty("mail.imaps.auth.login.disable"));
+        ServerSettings smtp = new ServerSettings("smtp.gmail.com", 465, ConnectionSecurity.TLS);
+        Properties s = MailSessions.smtpProperties(smtp, AuthMethod.OAUTH2_GOOGLE);
+        assertEquals("XOAUTH2", s.getProperty("mail.smtps.auth.mechanisms"));
+        assertNull(MailSessions.smtpProperties(smtp).getProperty("mail.smtps.auth.mechanisms"));
     }
 }

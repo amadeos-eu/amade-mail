@@ -5,6 +5,7 @@ import org.datazuul.amadeos.commons.config.AppDirectories;
 import org.datazuul.amadeos.commons.config.PropertiesFile;
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.AccountColor;
+import org.datazuul.amadeos.mail.domain.AuthMethod;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
 import org.datazuul.amadeos.mail.domain.ServerSettings;
 import org.slf4j.Logger;
@@ -82,7 +83,8 @@ public final class FileAccountRepository implements AccountRepository {
                 readServer(p, prefix + "imap.", ConnectionSecurity.TLS, true),
                 readServer(p, prefix + "smtp.", ConnectionSecurity.STARTTLS, false),
                 p.getProperty(prefix + "signature", ""),
-                readColor(p.getProperty(prefix + "color"), index));
+                readColor(p.getProperty(prefix + "color"), index),
+                readAuth(p.getProperty(prefix + "auth")));
     }
 
     private static ServerSettings readServer(Properties p, String prefix, ConnectionSecurity fallback, boolean imap) {
@@ -102,6 +104,7 @@ public final class FileAccountRepository implements AccountRepository {
         writeServer(p, prefix + "smtp.", a.smtp());
         p.setProperty(prefix + "signature", a.signature());
         p.setProperty(prefix + "color", a.color().name());
+        p.setProperty(prefix + "auth", a.auth().name());
     }
 
     private static void writeServer(Properties p, String prefix, ServerSettings s) {
@@ -125,6 +128,15 @@ public final class FileAccountRepository implements AccountRepository {
             return Integer.parseInt(value.strip());
         } catch (NumberFormatException e) {
             return fallback;
+        }
+    }
+
+    private static AuthMethod readAuth(String value) {
+        if (value == null) return AuthMethod.PASSWORD;
+        try {
+            return AuthMethod.valueOf(value.strip());
+        } catch (IllegalArgumentException e) {
+            return AuthMethod.PASSWORD;
         }
     }
 

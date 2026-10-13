@@ -3,7 +3,7 @@ package org.datazuul.amadeos.mail.service;
 import org.datazuul.amadeos.mail.domain.Account;
 
 /**
- * Supplies account passwords to the mail gateway. Implementations may ask the user, so
+ * Supplies account passwords, or OAuth2 access tokens, to the mail gateway. Implementations may ask the user, so
  * {@link #password(Account)} is only called from background threads.
  */
 public interface CredentialProvider {
@@ -17,4 +17,7 @@ public interface CredentialProvider {
 
     /** The user entered a new password in Mail Options. */
     void passwordChanged(String accountId, String password);
+
+    /** Drops the OAuth2 tokens of an account that was removed or whose login changed. */
+    void signOut(String accountId);
 }

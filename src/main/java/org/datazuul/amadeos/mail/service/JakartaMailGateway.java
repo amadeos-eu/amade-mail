@@ -16,6 +16,7 @@ import jakarta.mail.Transport;
 import jakarta.mail.UIDFolder;
 import jakarta.mail.internet.MimeMessage;
 import org.datazuul.amadeos.mail.domain.Account;
+import org.datazuul.amadeos.mail.domain.AuthMethod;
 import org.datazuul.amadeos.mail.domain.FolderRole;
 import org.datazuul.amadeos.mail.domain.MailFolder;
 import org.datazuul.amadeos.mail.domain.MessageContent;
@@ -77,6 +78,7 @@ public final class JakartaMailGateway implements MailGateway {
         Store store;
         ServerSettings settings;
         String username;
+        AuthMethod auth;
     }
 
     private <T> T withStore(Account account, StoreAction<T> action) {
@@ -106,7 +108,8 @@ public final class JakartaMailGateway implements MailGateway {
 
     private Store connect(Connection connection, Account account) throws MessagingException {
         if (connection.store != null && connection.store.isConnected()
-                && account.imap().equals(connection.settings) && account.username().equals(connection.username)) {
+                && account.imap().equals(connection.settings) && account.username().equals(connection.username)
+                && account.auth() == connection.auth) {
             return connection.store;
         }
         closeQuietly(connection);
@@ -114,12 +117,13 @@ public final class JakartaMailGateway implements MailGateway {
         connection.store = store;
         connection.settings = account.imap();
         connection.username = account.username();
+        connection.auth = account.auth();
         return store;
     }
 
     private static Store openStore(Account account, String password) throws MessagingException {
         ServerSettings imap = account.imap();
-        Session session = Session.getInstance(MailSessions.imapProperties(imap));
+        Session session = Session.getInstance(MailSessions.imapProperties(imap, account.auth()));
         Store store = session.getStore(MailSessions.imapProtocol(imap));
         store.connect(imap.host(), imap.port(), account.username(), password);
         return store;
@@ -136,6 +140,7 @@ public final class JakartaMailGateway implements MailGateway {
         connection.store = null;
         connection.settings = null;
         connection.username = null;
+        connection.auth = null;
     }
 
     @Override
@@ -163,16 +168,16 @@ public final class JakartaMailGateway implements MailGateway {
             Store store = openStore(account, password);
             store.close();
         } catch (MessagingException e) {
-            throw failure("IMAP", account.imap(), e);
+            throw failure("IMAP", account.imap(), account.auth(), e);
         }
         try {
             ServerSettings smtp = account.smtp();
-            Session session = Session.getInstance(MailSessions.smtpProperties(smtp));
+            Session session = Session.getInstance(MailSessions.smtpProperties(smtp, account.auth()));
             try (Transport transport = session.getTransport(MailSessions.smtpProtocol(smtp))) {
                 transport.connect(smtp.host(), smtp.port(), account.username(), password);
             }
         } catch (MessagingException e) {
-            throw failure("SMTP", account.smtp(), e);
+            throw failure("SMTP", account.smtp(), account.auth(), e);
         }
     }
 
@@ -361,7 +366,7 @@ public final class JakartaMailGateway implements MailGateway {
         ServerSettings smtp = account.smtp();
         MimeMessage message;
         try {
-            Session session = Session.getInstance(MailSessions.smtpProperties(smtp));
+            Session session = Session.getInstance(MailSessions.smtpProperties(smtp, account.auth()));
             message = composer.build(session, outgoing);
             try (Transport transport = session.getTransport(MailSessions.smtpProtocol(smtp))) {
                 transport.connect(smtp.host(), smtp.port(), account.username(), credentials.password(account));
@@ -369,9 +374,9 @@ public final class JakartaMailGateway implements MailGateway {
             }
         } catch (AuthenticationFailedException e) {
             credentials.rejected(account);
-            throw failure("SMTP", smtp, e);
+            throw failure("SMTP", smtp, account.auth(), e);
         } catch (MessagingException e) {
-            throw failure("SMTP", smtp, e);
+            throw failure("SMTP", smtp, account.auth(), e);
         } catch (IOException e) {
             throw new MailServiceException("Cannot read attachment: " + e.getMessage(), e);
         }
@@ -427,13 +432,16 @@ public final class JakartaMailGateway implements MailGateway {
 
     private static MailServiceException failure(Account account, Exception e) {
         if (e instanceof MailServiceException mse) return mse;
-        return failure("IMAP", account.imap(), e);
+        return failure("IMAP", account.imap(), account.auth(), e);
     }
 
-    static MailServiceException failure(String protocol, ServerSettings server, Exception e) {
+    static MailServiceException failure(String protocol, ServerSettings server, AuthMethod method, Exception e) {
         if (e instanceof MailServiceException mse) return mse;
         boolean auth = e instanceof AuthenticationFailedException;
-        String reason = auth ? "Login failed. Check user name and password." : reason(e, server);
+        String reason = !auth ? reason(e, server)
+                : method.isOAuth2() ? "Login with the " + method.provider().label()
+                        + " access token failed. Check that the user name is the signed-in address."
+                : "Login failed. Check user name and password.";
         LOG.warn("{} {} failed: {}", protocol, server.describe(), e.toString());
         return new MailServiceException(protocol + " " + server.host() + ": " + reason, e, auth);
     }

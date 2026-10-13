@@ -183,7 +183,12 @@ public final class MainPresenter implements MessageViewActions {
         for (Account account : edited) {
             Account before = old.remove(account.id());
             boolean serverChanged = before == null || !before.imap().equals(account.imap())
-                    || !before.username().equals(account.username()) || passwords.containsKey(account.id());
+                    || !before.username().equals(account.username()) || before.auth() != account.auth()
+                    || passwords.containsKey(account.id());
+            // Tokens are kept when switching to OAuth2, as "Test connection" may have just signed in.
+            if (before != null && before.auth().isOAuth2() && !account.auth().isOAuth2()) {
+                credentials.signOut(account.id());
+            }
             if (serverChanged) {
                 gateway.disconnect(account.id());
                 changed.add(account);
@@ -192,6 +197,7 @@ public final class MainPresenter implements MessageViewActions {
         for (Account removed : old.values()) {
             gateway.disconnect(removed.id());
             passwordStore.delete(removed.id());
+            credentials.signOut(removed.id());
             states.remove(removed.id());
         }
         passwords.forEach((id, password) -> {
@@ -220,6 +226,18 @@ public final class MainPresenter implements MessageViewActions {
     /** Test connection in Mail Options. */
     public void testConnection(Account account, String passwordOrNull, Consumer<String> result) {
         async(() -> {
+            if (account.auth().isOAuth2()) {
+                // Signs in in the web browser if no valid token is stored.
+                String token = credentials.password(account);
+                try {
+                    gateway.testConnection(account, token);
+                } catch (MailServiceException e) {
+                    if (e.isAuthenticationFailure()) credentials.rejected(account);
+                    throw e;
+                }
+                return "Connection OK: signed in with " + account.auth().provider().label()
+                        + ", IMAP and SMTP login succeeded.";
+            }
             String password = passwordOrNull != null ? passwordOrNull : passwordStore.lookup(account.id())
                     .orElseThrow(() -> new MailServiceException("Enter the password first."));
             gateway.testConnection(account, password);

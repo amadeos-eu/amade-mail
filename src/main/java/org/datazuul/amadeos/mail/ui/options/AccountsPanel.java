@@ -2,6 +2,7 @@ package org.datazuul.amadeos.mail.ui.options;
 
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.AccountColor;
+import org.datazuul.amadeos.mail.domain.AuthMethod;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
 import org.datazuul.amadeos.mail.domain.ServerSettings;
 import org.datazuul.amadeos.mail.service.ServerGuesser;
@@ -36,6 +37,7 @@ public final class AccountsPanel extends JPanel {
     private final JTextField displayName = new JTextField(24);
     private final JTextField email = new JTextField(24);
     private final JTextField username = new JTextField(24);
+    private final JComboBox<AuthMethod> auth = new JComboBox<>(AuthMethod.values());
     private final JPasswordField password = new JPasswordField(24);
     private final ServerFields imap = new ServerFields(true);
     private final ServerFields smtp = new ServerFields(false);
@@ -97,6 +99,7 @@ public final class AccountsPanel extends JPanel {
         row = field(row, "Incoming (IMAP)", imap);
         row = field(row, "Outgoing (SMTP)", smtp);
         row = field(row, "User name", username);
+        row = field(row, "Authentication", auth);
         row = field(row, "Password", password);
         signature.setLineWrap(true);
         JScrollPane signatureScroll = new JScrollPane(signature);
@@ -110,6 +113,13 @@ public final class AccountsPanel extends JPanel {
         hint.setFont(hint.getFont().deriveFont(Font.PLAIN, 11f));
         field(row, "", hint);
         password.setToolTipText("Leave empty to keep the stored password");
+        auth.addActionListener(e -> {
+            updatePasswordField();
+            if (!loading && selectedAuth().isOAuth2()) {
+                hint.setText("Press \"Test connection\" to sign in with " + selectedAuth().provider().label()
+                        + " in the web browser.");
+            }
+        });
         add(form, BorderLayout.CENTER);
         setFormEnabled(false);
     }
@@ -191,6 +201,7 @@ public final class AccountsPanel extends JPanel {
             imap.set(g.imap());
             smtp.set(g.smtp());
             if (username.getText().isBlank()) username.setText(g.username());
+            auth.setSelectedItem(g.auth());
             if (name.getText().isBlank() || "New account".equals(name.getText())) {
                 String address = email.getText().strip();
                 name.setText(address.substring(address.indexOf('@') + 1));
@@ -206,7 +217,9 @@ public final class AccountsPanel extends JPanel {
             hint.setText("Fill in address, user name and both servers first.");
             return;
         }
-        hint.setText("Testing " + editing.imap().host() + " and " + editing.smtp().host() + " …");
+        hint.setText(editing.auth().isOAuth2()
+                ? "Signing in and testing " + editing.imap().host() + " and " + editing.smtp().host() + " …"
+                : "Testing " + editing.imap().host() + " and " + editing.smtp().host() + " …");
         Account tested = editing;
         tester.test(tested, passwords.get(tested.id()), message -> {
             if (editing != null && editing.id().equals(tested.id())) hint.setText(message);
@@ -222,6 +235,7 @@ public final class AccountsPanel extends JPanel {
             displayName.setText(a.displayName());
             email.setText(a.email());
             username.setText(a.username());
+            auth.setSelectedItem(a.auth());
             password.setText(passwords.getOrDefault(a.id(), ""));
             imap.set(a.imap());
             smtp.set(a.smtp());
@@ -240,9 +254,10 @@ public final class AccountsPanel extends JPanel {
         int index = indexOf(editing.id());
         if (index < 0) return;
         Account updated = new Account(editing.id(), name.getText(), displayName.getText(), email.getText(),
-                username.getText(), imap.get(), smtp.get(), signature.getText(), (AccountColor) color.getSelectedItem());
+                username.getText(), imap.get(), smtp.get(), signature.getText(), (AccountColor) color.getSelectedItem(),
+                selectedAuth());
         String typed = new String(password.getPassword());
-        if (!typed.isEmpty()) passwords.put(editing.id(), typed);
+        if (!typed.isEmpty() && !updated.auth().isOAuth2()) passwords.put(editing.id(), typed);
         editing = updated;
         loading = true;
         try {
@@ -258,11 +273,21 @@ public final class AccountsPanel extends JPanel {
     }
 
     private void setFormEnabled(boolean enabled) {
-        for (JComponent c : List.of(name, displayName, email, username, password, signature, color)) {
+        for (JComponent c : List.of(name, displayName, email, username, auth, signature, color)) {
             c.setEnabled(enabled);
         }
         imap.setEnabled(enabled);
         smtp.setEnabled(enabled);
+        updatePasswordField();
+    }
+
+    private AuthMethod selectedAuth() {
+        return (AuthMethod) auth.getSelectedItem();
+    }
+
+    /** OAuth2 accounts have no password; the token comes from the browser sign-in. */
+    private void updatePasswordField() {
+        password.setEnabled(editing != null && !selectedAuth().isOAuth2());
     }
 
     private int field(int row, String label, JComponent component) {

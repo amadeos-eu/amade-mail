@@ -2,6 +2,7 @@ package org.datazuul.amadeos.mail.repository;
 
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.AccountColor;
+import org.datazuul.amadeos.mail.domain.AuthMethod;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
 import org.datazuul.amadeos.mail.domain.ServerSettings;
 import org.junit.jupiter.api.Test;
@@ -43,7 +44,9 @@ class FileAccountRepositoryTest {
         Path file = dir.resolve("accounts.conf");
         new FileAccountRepository(file).save(List.of(account("a1", "Privat", AccountColor.BLUE)));
         for (String line : Files.readAllLines(file)) {
-            if (!line.startsWith("#")) assertFalse(line.toLowerCase().contains("password"), line);
+            // ".auth=PASSWORD" names the login method, it is not a secret.
+            if (line.startsWith("#") || line.endsWith(".auth=PASSWORD")) continue;
+            assertFalse(line.toLowerCase().contains("password"), line);
         }
     }
 
@@ -67,5 +70,16 @@ class FileAccountRepositoryTest {
         assertEquals(ConnectionSecurity.STARTTLS, a.smtp().security());
         assertEquals(587, a.smtp().port());
         assertEquals(AccountColor.BLUE, a.color());
+        assertEquals(AuthMethod.PASSWORD, a.auth());
+    }
+
+    @Test
+    void keepsTheAuthenticationMethod() {
+        FileAccountRepository repository = new FileAccountRepository(dir.resolve("accounts.conf"));
+        Account plain = account("a1", "Privat", AccountColor.BLUE);
+        Account gmail = new Account("g1", "Gmail", "Ralf", "ralf@gmail.com", "ralf@gmail.com", plain.imap(),
+                plain.smtp(), "", AccountColor.TEAL, AuthMethod.OAUTH2_GOOGLE);
+        repository.save(List.of(plain, gmail));
+        assertEquals(List.of(plain, gmail), repository.load());
     }
 }

@@ -1,5 +1,6 @@
 package org.datazuul.amadeos.mail.service;
 
+import org.datazuul.amadeos.mail.domain.AuthMethod;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
 import org.datazuul.amadeos.mail.domain.ServerSettings;
 
@@ -15,14 +16,16 @@ import java.util.Optional;
  */
 public final class ServerGuesser {
 
-    public record Guess(ServerSettings imap, ServerSettings smtp, String username, String hint) {
+    public record Guess(ServerSettings imap, ServerSettings smtp, String username, AuthMethod auth, String hint) {
     }
+
+    private static final String GMAIL_HINT = "Press \"Test connection\" to sign in with Google in the web browser.";
 
     private static final Map<String, Guess> PROVIDERS = Map.ofEntries(
             provider("gmail.com", "imap.gmail.com", 993, ConnectionSecurity.TLS, "smtp.gmail.com", 465,
-                    ConnectionSecurity.TLS, "Gmail requires an app password (2-step verification)."),
+                    ConnectionSecurity.TLS, AuthMethod.OAUTH2_GOOGLE, GMAIL_HINT),
             provider("googlemail.com", "imap.gmail.com", 993, ConnectionSecurity.TLS, "smtp.gmail.com", 465,
-                    ConnectionSecurity.TLS, "Gmail requires an app password (2-step verification)."),
+                    ConnectionSecurity.TLS, AuthMethod.OAUTH2_GOOGLE, GMAIL_HINT),
             provider("gmx.de", "imap.gmx.net", 993, ConnectionSecurity.TLS, "mail.gmx.net", 587,
                     ConnectionSecurity.STARTTLS, "Enable IMAP access in the GMX web settings first."),
             provider("gmx.net", "imap.gmx.net", 993, ConnectionSecurity.TLS, "mail.gmx.net", 587,
@@ -45,18 +48,28 @@ public final class ServerGuesser {
         if (at <= 0 || at == address.length() - 1) return Optional.empty();
         String domain = address.substring(at + 1);
         Guess known = PROVIDERS.get(domain);
-        if (known != null) return Optional.of(new Guess(known.imap(), known.smtp(), email.strip(), known.hint()));
+        if (known != null) {
+            return Optional.of(new Guess(known.imap(), known.smtp(), email.strip(), known.auth(), known.hint()));
+        }
         return Optional.of(new Guess(
                 new ServerSettings("imap." + domain, 993, ConnectionSecurity.TLS),
                 new ServerSettings("smtp." + domain, 587, ConnectionSecurity.STARTTLS),
                 email.strip(),
+                AuthMethod.PASSWORD,
                 "Guessed from the domain; use \"Test connection\" to check."));
     }
 
     private static Map.Entry<String, Guess> provider(String domain, String imapHost, int imapPort,
                                                      ConnectionSecurity imapSecurity, String smtpHost, int smtpPort,
                                                      ConnectionSecurity smtpSecurity, String hint) {
+        return provider(domain, imapHost, imapPort, imapSecurity, smtpHost, smtpPort, smtpSecurity,
+                AuthMethod.PASSWORD, hint);
+    }
+
+    private static Map.Entry<String, Guess> provider(String domain, String imapHost, int imapPort,
+                                                     ConnectionSecurity imapSecurity, String smtpHost, int smtpPort,
+                                                     ConnectionSecurity smtpSecurity, AuthMethod auth, String hint) {
         return Map.entry(domain, new Guess(new ServerSettings(imapHost, imapPort, imapSecurity),
-                new ServerSettings(smtpHost, smtpPort, smtpSecurity), "", hint));
+                new ServerSettings(smtpHost, smtpPort, smtpSecurity), "", auth, hint));
     }
 }

@@ -1,5 +1,6 @@
 package org.datazuul.amadeos.mail.service;
 
+import org.datazuul.amadeos.mail.domain.AuthMethod;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
 import org.datazuul.amadeos.mail.domain.ServerSettings;
 
@@ -23,10 +24,14 @@ public final class MailSessions {
     }
 
     public static Properties imapProperties(ServerSettings server) {
+        return imapProperties(server, AuthMethod.PASSWORD);
+    }
+
+    public static Properties imapProperties(ServerSettings server, AuthMethod auth) {
         Properties p = new Properties();
         String protocol = imapProtocol(server);
         p.setProperty("mail.store.protocol", protocol);
-        common(p, protocol, server);
+        common(p, protocol, server, auth);
         // Messages are fetched in one piece instead of 16 KiB partial fetches.
         p.setProperty("mail." + protocol + ".partialfetch", "false");
         p.setProperty("mail." + protocol + ".fetchsize", "1048576");
@@ -34,15 +39,19 @@ public final class MailSessions {
     }
 
     public static Properties smtpProperties(ServerSettings server) {
+        return smtpProperties(server, AuthMethod.PASSWORD);
+    }
+
+    public static Properties smtpProperties(ServerSettings server, AuthMethod auth) {
         Properties p = new Properties();
         String protocol = smtpProtocol(server);
         p.setProperty("mail.transport.protocol", protocol);
-        common(p, protocol, server);
+        common(p, protocol, server, auth);
         p.setProperty("mail." + protocol + ".auth", "true");
         return p;
     }
 
-    private static void common(Properties p, String protocol, ServerSettings server) {
+    private static void common(Properties p, String protocol, ServerSettings server, AuthMethod auth) {
         String prefix = "mail." + protocol + ".";
         p.setProperty(prefix + "host", server.host());
         p.setProperty(prefix + "port", Integer.toString(server.port()));
@@ -62,6 +71,13 @@ public final class MailSessions {
             case NONE -> {
                 // plain connection, intended for local test servers only
             }
+        }
+        if (auth.isOAuth2()) {
+            // SASL XOAUTH2 with the access token as password; never fall back to sending it as a password.
+            p.setProperty(prefix + "auth.mechanisms", "XOAUTH2");
+            p.setProperty(prefix + "auth.xoauth2.disable", "false");
+            p.setProperty(prefix + "auth.login.disable", "true");
+            p.setProperty(prefix + "auth.plain.disable", "true");
         }
     }
 }

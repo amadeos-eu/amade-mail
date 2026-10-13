@@ -45,8 +45,8 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
 - **Move menu** lists the folders of the selected message's account, as in dtmail.
 - **Mail Options** (*Mailbox → Mail Options…*) is one dialog with a *Category* menu:
   - *Accounts*: list with Add / Remove / Move up / Move down; name, sender, IMAP and SMTP server
-    (host, port, SSL/TLS or STARTTLS), user name, password, signature, colour;
-    *Guess settings* from the address and *Test connection*.
+    (host, port, SSL/TLS or STARTTLS), user name, authentication (*Password* or *OAuth2 (Google)*),
+    password, signature, colour; *Guess settings* from the address and *Test connection*.
   - *Message View*: plain text or HTML by default, remote images, check interval.
 - **Compose window**: From (account with colour), To, Cc, Bcc (*Format → Show Bcc Field*), Subject,
   attachments; *Reply to Sender*, *Reply to All*, *Forward*.
@@ -65,6 +65,9 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
 - **Passwords** are not stored in the configuration file but in the freedesktop Secret Service
   (gnome-keyring, KeePassXC) via `secret-tool` (Debian package `libsecret-tools`). Without a keyring,
   passwords are kept for the running session only.
+- **OAuth2** (Gmail): no password is stored. You sign in once in the web browser (see
+  [Gmail with OAuth2](#gmail-with-oauth2)); the refresh token is kept in the keyring, access tokens
+  only in memory. IMAP and SMTP log in with SASL XOAUTH2 only.
 - **TLS**: STARTTLS is *required* when selected (no silent fallback to plain text) and server
   certificates are checked against the host name.
 
@@ -76,6 +79,46 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
 |---|---|
 | `accounts.conf` | accounts in display order, without passwords |
 | `mail.conf` | Message View settings and check interval |
+| `oauth2.conf` | OAuth client ID and secret per provider (`google.clientId`, `google.clientSecret`) |
+
+### Gmail with OAuth2
+
+Google lets the user grant access only in a real web browser, so the Mailer opens the system
+browser once per account. The browser redirects back to a short-lived listener on `127.0.0.1`
+(RFC 8252, with PKCE). After that the Mailer renews the access token in the background; you only
+sign in again if Google revokes the refresh token, e.g. after a password change.
+
+The Mailer needs an OAuth client of your own. To create it and add the account, follow
+[CONTRIBUTING.md → Initial Setup - Google OAuth2](CONTRIBUTING.md#initial-setup---google-oauth2).
+
+Alternatively, use a Gmail app password (see below), which needs no OAuth client.
+
+### Gmail with an app password
+
+An app password is a 16-character password that Google generates for one application. It needs no
+OAuth client and no browser sign-in, but your Google account must have 2-step verification.
+
+1. Turn on 2-step verification: [Google Account → Security](https://myaccount.google.com/security)
+   → *2-Step Verification* (*Bestätigung in zwei Schritten*).
+2. Open [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords), enter an app
+   name such as `amade-mail`, and click **Create** (*Erstellen*).
+3. Copy the 16-character password that Google shows. Google shows it only once.
+4. In the Mailer, open *Mailbox → Mail Options… → Accounts → Add…*, enter your Gmail address and
+   press *Guess settings*. Then:
+   - set *Authentication* to **Password**, because *Guess settings* picks OAuth2 for Gmail;
+   - enter the app password, without spaces, in *Password*;
+   - check the servers: IMAP `imap.gmail.com` 993 SSL/TLS, SMTP `smtp.gmail.com` 465 SSL/TLS, and
+     your full Gmail address as user name.
+5. Press *Test connection*, then **OK**. The password is stored in the keyring.
+
+Notes:
+
+- If the app passwords page says the setting is not available, 2-step verification is off. Google
+  also turns app passwords off for accounts with Advanced Protection, and Workspace admins can turn
+  them off for their accounts.
+- Google revokes all app passwords when you change your Google password. Create a new one and enter
+  it when the Mailer asks.
+- To revoke access, delete the app password on the same page.
 
 ## Architecture
 
@@ -86,9 +129,9 @@ chosen in the Style Manager immediately, including *Dark Slate*.
 
 | Package | Content |
 |---|---|
-| `domain` | `Account`, `ServerSettings`, `MailFolder`, `FolderRole`, `MessageSummary`, `MessageContent`, `OutgoingMessage`, `MailPreferences` |
-| `repository` | `FileAccountRepository`, `PreferencesRepository` (passwords: `PasswordStore` from amade-commons) |
-| `service` | `MailGateway` / `JakartaMailGateway` (IMAP + SMTP on Jakarta Mail / Eclipse Angus), `MessageParser`, `MessageComposer`, `HtmlSanitizer`, `RemoteImageLoader`, `ServerGuesser`, `MailtoLink` |
+| `domain` | `Account`, `AuthMethod`, `OAuth2Provider`, `OAuth2Client`, `ServerSettings`, `MailFolder`, `FolderRole`, `MessageSummary`, `MessageContent`, `OutgoingMessage`, `MailPreferences` |
+| `repository` | `FileAccountRepository`, `PreferencesRepository`, `OAuth2ClientRepository` (passwords: `PasswordStore` from amade-commons) |
+| `service` | `MailGateway` / `JakartaMailGateway` (IMAP + SMTP on Jakarta Mail / Eclipse Angus), `OAuth2Service` (browser sign-in, token refresh), `MessageParser`, `MessageComposer`, `HtmlSanitizer`, `RemoteImageLoader`, `ServerGuesser`, `MailtoLink` |
 | `ui.main` | `MainWindow`, `MainMenuBar`, `MainPresenter` (all behaviour, testable without Swing windows) |
 | `ui.folders`, `ui.messages`, `ui.view`, `ui.options`, `ui.compose` | folder column, header list, message view, Mail Options, compose window |
 
@@ -124,7 +167,8 @@ so the amadeOS front panel lists it in the Mail drawer.
 - [ ] Drag and drop of messages onto folders; folder management (new, rename, delete)
 - [ ] Drafts, templates, aliases / several identities per account, vacation message
 - [ ] Search; threading; printing
-- [ ] OAuth2 for Gmail and Microsoft 365
+- [x] OAuth2 for Gmail
+- [ ] OAuth2 for Microsoft 365
 - [ ] Offline cache of headers and messages
 
 ## License
