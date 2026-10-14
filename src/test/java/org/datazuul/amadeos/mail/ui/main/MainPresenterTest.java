@@ -103,7 +103,7 @@ class MainPresenterTest {
         assertEquals("Loaded 2 messages, 1 new", MainPresenter.loadedStatus(two, 10));
         List<MessageSummary> full = java.util.stream.LongStream.rangeClosed(1, MainPresenter.MESSAGE_LIMIT)
                 .mapToObj(uid -> summary(uid, true)).toList();
-        assertEquals("Loaded 500 messages, 0 new (newest 500 of 1200)", MainPresenter.loadedStatus(full, 1200));
+        assertEquals("Loaded 500 messages, 0 new (newest 500 of 1,200)", MainPresenter.loadedStatus(full, 1200));
     }
 
     @Test
