@@ -23,7 +23,15 @@ jobs:
           cache-provider: basic
       # The Swing integration tests skip themselves without a display, so run under Xvfb.
       - name: Test
-        run: xvfb-run --auto-servernum ./gradlew test --no-daemon
+        run: |
+          set -o pipefail
+          xvfb-run --auto-servernum ./gradlew test --no-daemon 2>&1 | tee build.log
+      # Compiler errors and failed tests as annotations, readable in the pull request without the log.
+      - name: Report failures
+        if: failure()
+        run: |
+          grep -E "\.java:[0-9]+: error:|Test.* FAILED|^\s+(org\.opentest4j|java\.lang)\.[A-Za-z]+(Error|Exception)" build.log \
+            | head -40 | sed 's/^/::error::/' || true
       - name: Upload test reports
         if: failure()
         uses: actions/upload-artifact@v7
