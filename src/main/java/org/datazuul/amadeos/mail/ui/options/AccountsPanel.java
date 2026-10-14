@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.options;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.AccountColor;
 import org.datazuul.amadeos.mail.domain.AuthMethod;
@@ -77,10 +79,10 @@ public final class AccountsPanel extends JPanel {
 
         JPanel listButtons = new JPanel(new GridLayout(0, 1, 0, 4));
         listButtons.setOpaque(false);
-        listButtons.add(button("Add…", this::add));
-        listButtons.add(button("Remove", this::remove));
-        listButtons.add(button("Move up", () -> move(-1)));
-        listButtons.add(button("Move down", () -> move(1)));
+        listButtons.add(button(tr("accounts.add"), this::add));
+        listButtons.add(button(tr("accounts.remove"), this::remove));
+        listButtons.add(button(tr("accounts.up"), () -> move(-1)));
+        listButtons.add(button(tr("accounts.down"), () -> move(1)));
         JPanel left = new JPanel(new BorderLayout(0, 6));
         left.setOpaque(false);
         left.add(listScroll, BorderLayout.CENTER);
@@ -89,35 +91,34 @@ public final class AccountsPanel extends JPanel {
 
         form.setOpaque(false);
         int row = 0;
-        row = field(row, "Account name", name);
-        row = field(row, "Your name", displayName);
+        row = field(row, tr("accounts.name"), name);
+        row = field(row, tr("accounts.display-name"), displayName);
         JPanel emailRow = new JPanel(new BorderLayout(6, 0));
         emailRow.setOpaque(false);
         emailRow.add(email, BorderLayout.CENTER);
-        emailRow.add(button("Guess settings", this::guess), BorderLayout.EAST);
-        row = field(row, "Email address", emailRow);
-        row = field(row, "Incoming (IMAP)", imap);
-        row = field(row, "Outgoing (SMTP)", smtp);
-        row = field(row, "User name", username);
-        row = field(row, "Authentication", auth);
-        row = field(row, "Password", password);
+        emailRow.add(button(tr("accounts.guess"), this::guess), BorderLayout.EAST);
+        row = field(row, tr("accounts.email"), emailRow);
+        row = field(row, tr("accounts.imap"), imap);
+        row = field(row, tr("accounts.smtp"), smtp);
+        row = field(row, tr("accounts.username"), username);
+        row = field(row, tr("accounts.auth"), auth);
+        row = field(row, tr("accounts.password"), password);
         signature.setLineWrap(true);
         JScrollPane signatureScroll = new JScrollPane(signature);
         signatureScroll.setBorder(AmadeUI.sunken());
-        row = field(row, "Signature", signatureScroll);
-        row = field(row, "Color", color);
+        row = field(row, tr("accounts.signature"), signatureScroll);
+        row = field(row, tr("accounts.color"), color);
         JPanel test = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         test.setOpaque(false);
-        test.add(button("Test connection", this::testConnection));
+        test.add(button(tr("accounts.test"), this::testConnection));
         row = field(row, "", test);
         hint.setFont(hint.getFont().deriveFont(Font.PLAIN, 11f));
         field(row, "", hint);
-        password.setToolTipText("Leave empty to keep the stored password");
+        password.setToolTipText(tr("accounts.password.keep"));
         auth.addActionListener(e -> {
             updatePasswordField();
             if (!loading && selectedAuth().isOAuth2()) {
-                hint.setText("Press \"Test connection\" to sign in with " + selectedAuth().provider().label()
-                        + " in the web browser.");
+                hint.setText(tr("accounts.hint.oauth", selectedAuth().provider().label()));
             }
         });
         add(form, BorderLayout.CENTER);
@@ -159,15 +160,15 @@ public final class AccountsPanel extends JPanel {
         listModel.addElement(account);
         list.setSelectedIndex(listModel.size() - 1);
         email.requestFocusInWindow();
-        hint.setText("Enter your email address and press \"Guess settings\".");
+        hint.setText(tr("accounts.hint.new"));
     }
 
     private void remove() {
         int index = list.getSelectedIndex();
         if (index < 0) return;
         Account account = listModel.get(index);
-        int answer = JOptionPane.showConfirmDialog(this, "Remove the account \"" + account.label()
-                + "\"?\nMessages on the server are not affected.", "Remove account", JOptionPane.OK_CANCEL_OPTION);
+        int answer = JOptionPane.showConfirmDialog(this, tr("accounts.remove.confirm", account.label()),
+                tr("accounts.remove.title"), JOptionPane.OK_CANCEL_OPTION);
         if (answer != JOptionPane.OK_OPTION) return;
         loading = true;
         try {
@@ -202,24 +203,23 @@ public final class AccountsPanel extends JPanel {
             smtp.set(g.smtp());
             if (username.getText().isBlank()) username.setText(g.username());
             auth.setSelectedItem(g.auth());
-            if (name.getText().isBlank() || "New account".equals(name.getText())) {
+            if (name.getText().isBlank() || tr("account.new").equals(name.getText())) {
                 String address = email.getText().strip();
                 name.setText(address.substring(address.indexOf('@') + 1));
             }
             hint.setText(g.hint().isEmpty() ? " " : g.hint());
-        }, () -> hint.setText("Enter a complete email address first."));
+        }, () -> hint.setText(tr("accounts.hint.complete-address")));
     }
 
     private void testConnection() {
         commit();
         if (editing == null) return;
         if (!editing.isComplete()) {
-            hint.setText("Fill in address, user name and both servers first.");
+            hint.setText(tr("accounts.hint.incomplete"));
             return;
         }
-        hint.setText(editing.auth().isOAuth2()
-                ? "Signing in and testing " + editing.imap().host() + " and " + editing.smtp().host() + " …"
-                : "Testing " + editing.imap().host() + " and " + editing.smtp().host() + " …");
+        hint.setText(tr(editing.auth().isOAuth2() ? "accounts.testing.oauth" : "accounts.testing",
+                editing.imap().host(), editing.smtp().host()));
         Account tested = editing;
         tester.test(tested, passwords.get(tested.id()), message -> {
             if (editing != null && editing.id().equals(tested.id())) hint.setText(message);

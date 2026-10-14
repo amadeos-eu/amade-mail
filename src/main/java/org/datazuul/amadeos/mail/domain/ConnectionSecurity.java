@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.domain;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 /**
  * How a connection to an IMAP or SMTP server is protected.
  */
@@ -31,6 +33,6 @@ public enum ConnectionSecurity {
 
     @Override
     public String toString() {
-        return label;
+        return this == NONE ? tr("security.none") : label;
     }
 }

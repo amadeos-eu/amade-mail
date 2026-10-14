@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.folders;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.MailFolder;
 import org.datazuul.amadeos.commons.swing.EdtExecutor;
@@ -25,7 +27,7 @@ import java.util.function.Consumer;
  */
 public final class FolderTreePanel extends JPanel {
     private final FolderTreeBuilder builder = new FolderTreeBuilder();
-    private final JTree tree = new JTree(new DefaultTreeModel(new DefaultMutableTreeNode("Folders")));
+    private final JTree tree = new JTree(new DefaultTreeModel(new DefaultMutableTreeNode(tr("folders.title"))));
     private final Set<String> collapsed = new HashSet<>();
     private Consumer<TreeItem> selectionListener = item -> {
     };
@@ -33,7 +35,7 @@ public final class FolderTreePanel extends JPanel {
 
     public FolderTreePanel() {
         super(new BorderLayout(0, 3));
-        JLabel title = new JLabel("Folders");
+        JLabel title = new JLabel(tr("folders.title"));
         title.setFont(title.getFont().deriveFont(Font.PLAIN, 11f));
         add(title, BorderLayout.NORTH);
 
@@ -127,12 +129,12 @@ public final class FolderTreePanel extends JPanel {
     /** Text of a tree row, e.g. "INBOX (2)"; package visible for tests. */
     static String label(TreeItem item) {
         return switch (item) {
-            case TreeItem.UnifiedInbox u -> withCount("All inboxes", u.unread());
+            case TreeItem.UnifiedInbox u -> withCount(tr("folders.all-inboxes"), u.unread());
             case TreeItem.AccountItem a -> {
                 String text = withCount(a.account().label(), a.state().unread());
                 yield switch (a.state().status()) {
                     case LOADING -> text + " …";
-                    case OFFLINE -> text + " (offline)";
+                    case OFFLINE -> text + " " + tr("folders.offline");
                     case ONLINE -> text;
                 };
             }
@@ -141,7 +143,7 @@ public final class FolderTreePanel extends JPanel {
     }
 
     private static String displayName(MailFolder folder) {
-        return "INBOX".equalsIgnoreCase(folder.fullName()) ? "Inbox" : folder.name();
+        return "INBOX".equalsIgnoreCase(folder.fullName()) ? tr("folders.inbox") : folder.name();
     }
 
     private static String withCount(String text, int unread) {
@@ -170,12 +172,12 @@ public final class FolderTreePanel extends JPanel {
                 }
                 case TreeItem.FolderItem f -> {
                     setIcon(null);
-                    setToolTipText(f.folder().total() >= 0 ? f.folder().total() + " messages" : null);
+                    setToolTipText(f.folder().total() >= 0 ? tr("folders.messages", f.folder().total()) : null);
                     if (!f.folder().selectable() && !selected) setForeground(AmadeUI.theme().textInactive());
                 }
                 case TreeItem.UnifiedInbox u -> {
                     setIcon(null);
-                    setToolTipText("Inboxes of all accounts");
+                    setToolTipText(tr("folders.all-inboxes.tooltip"));
                 }
             }
             return this;

@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.common;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import com.google.inject.Inject;
 import org.datazuul.amadeos.commons.desktop.DesktopLauncher;
 import org.datazuul.amadeos.mail.domain.Account;
@@ -68,7 +70,7 @@ public final class PromptingCredentialProvider implements CredentialProvider {
             if (stored.isPresent()) return stored.get();
         }
         Prompt prompt = ask(account);
-        if (prompt == null) throw new MailServiceException(account.label() + ": no password entered.");
+        if (prompt == null) throw new MailServiceException(tr("credentials.no-password", account.label()));
         rejected.remove(account.id());
         session.put(account.id(), prompt.password());
         if (prompt.remember()) store.store(account.id(), "amade-mail " + account.email(), prompt.password());
@@ -105,7 +107,7 @@ public final class PromptingCredentialProvider implements CredentialProvider {
         OAuth2Client client = clients.load(provider).orElse(null);
         if (client == null) {
             client = onEdt(() -> askClient(provider));
-            if (client == null) throw new MailServiceException(account.label() + ": no OAuth client ID entered.");
+            if (client == null) throw new MailServiceException(tr("credentials.no-client", account.label()));
             clients.save(provider, client);
         }
         if (tokenRejections.getOrDefault(account.id(), 0) < MAX_TOKEN_REJECTIONS) {
@@ -143,12 +145,12 @@ public final class PromptingCredentialProvider implements CredentialProvider {
 
     /** Non-modal, so the user can work in the browser; closing it cancels the sign-in. */
     private JDialog showWaiting(Account account, URI uri, CompletableFuture<Void> cancelled) {
-        JDialog dialog = new JDialog((Frame) null, "Mailer - " + account.label(), false);
+        JDialog dialog = new JDialog((Frame) null, tr("app.title.with", account.label()), false);
         JPanel panel = new JPanel(new BorderLayout(0, 8));
         panel.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
-        panel.add(new JLabel("<html>Sign in as <b>" + account.username() + "</b> with "
-                + account.auth().provider().label() + " in your web browser.<br>"
-                + "If no browser window opened, copy this address into one:</html>"), BorderLayout.NORTH);
+        panel.add(new JLabel("<html>" + tr("credentials.sign-in", "<b>" + account.username() + "</b>",
+                account.auth().provider().label()) + "<br>" + tr("credentials.copy-address") + "</html>"),
+                BorderLayout.NORTH);
         JTextField address = new JTextField(uri.toString(), 40);
         address.setEditable(false);
         address.addFocusListener(new FocusAdapter() {
@@ -158,9 +160,9 @@ public final class PromptingCredentialProvider implements CredentialProvider {
             }
         });
         panel.add(address, BorderLayout.CENTER);
-        JButton again = new JButton("Open Browser Again");
+        JButton again = new JButton(tr("credentials.open-again"));
         again.addActionListener(e -> browse(uri));
-        JButton cancel = new JButton("Cancel");
+        JButton cancel = new JButton(UIManager.getString("OptionPane.cancelButtonText"));
         cancel.addActionListener(e -> {
             cancelled.complete(null);
             dialog.dispose();
@@ -189,13 +191,13 @@ public final class PromptingCredentialProvider implements CredentialProvider {
         JTextField clientSecret = new JTextField(36);
         JPanel panel = new JPanel(new GridLayout(0, 1, 0, 4));
         panel.setOpaque(false);
-        panel.add(new JLabel("<html>The Mailer needs an OAuth client registered with " + provider.label() + ":<br>"
+        panel.add(new JLabel("<html>" + tr("credentials.client.needed", provider.label()) + "<br>"
                 + provider.consoleHint() + ".</html>"));
-        panel.add(new JLabel("Client ID:"));
+        panel.add(new JLabel(tr("credentials.client.id")));
         panel.add(clientId);
-        panel.add(new JLabel("Client secret:"));
+        panel.add(new JLabel(tr("credentials.client.secret")));
         panel.add(clientSecret);
-        int answer = JOptionPane.showConfirmDialog(null, panel, "Mailer - " + provider.label() + " OAuth client",
+        int answer = JOptionPane.showConfirmDialog(null, panel, tr("app.title.with", tr("credentials.client.title", provider.label())),
                 JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
         if (answer != JOptionPane.OK_OPTION) return null;
         OAuth2Client client = new OAuth2Client(clientId.getText(), clientSecret.getText());
@@ -210,21 +212,21 @@ public final class PromptingCredentialProvider implements CredentialProvider {
     private Prompt ask(Account account) {
         return onEdt(() -> {
             JPasswordField field = new JPasswordField(24);
-            JCheckBox remember = new JCheckBox("Remember password", true);
+            JCheckBox remember = new JCheckBox(tr("credentials.remember"), true);
             remember.setOpaque(false);
             if (!store.isPersistent()) {
                 remember.setSelected(false);
                 remember.setEnabled(false);
-                remember.setToolTipText("No keyring available (install libsecret-tools)");
+                remember.setToolTipText(tr("credentials.no-keyring"));
             }
             JPanel panel = new JPanel(new GridLayout(0, 1, 0, 4));
             panel.setOpaque(false);
-            String reason = rejected.contains(account.id()) ? "The server rejected the password for " : "Password for ";
-            panel.add(new JLabel(reason + account.username() + " on " + account.imap().host() + ":"));
+            panel.add(new JLabel(tr(rejected.contains(account.id()) ? "credentials.rejected" : "credentials.password",
+                    account.username(), account.imap().host())));
             panel.add(field);
             panel.add(remember);
             JOptionPane pane = new JOptionPane(panel, JOptionPane.QUESTION_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-            JDialog d = pane.createDialog(null, "Mailer - " + account.label());
+            JDialog d = pane.createDialog(null, tr("app.title.with", account.label()));
             d.addWindowFocusListener(new WindowAdapter() {
                 @Override
                 public void windowGainedFocus(WindowEvent e) {

@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.domain;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -50,7 +52,7 @@ public record Account(String id, String name, String displayName, String email, 
 
     /** A new account with sensible defaults (implicit TLS for IMAP, STARTTLS submission for SMTP). */
     public static Account blank(AccountColor color) {
-        return new Account(newId(), "New account", "", "", "",
+        return new Account(newId(), tr("account.new"), "", "", "",
                 new ServerSettings("", ConnectionSecurity.TLS.defaultImapPort(), ConnectionSecurity.TLS),
                 new ServerSettings("", ConnectionSecurity.STARTTLS.defaultSmtpPort(), ConnectionSecurity.STARTTLS),
                 "", color);

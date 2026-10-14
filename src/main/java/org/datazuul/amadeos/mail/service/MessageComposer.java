@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.service;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
@@ -31,7 +33,7 @@ public final class MessageComposer {
         MimeMessage message = new MimeMessage(session);
         message.setFrom(sender(account));
         InternetAddress[] to = parse(outgoing.to(), "To");
-        if (to.length == 0) throw new MailServiceException("Enter at least one recipient.");
+        if (to.length == 0) throw new MailServiceException(tr("compose.error.no-recipient"));
         message.setRecipients(Message.RecipientType.TO, to);
         if (!outgoing.cc().isEmpty()) message.setRecipients(Message.RecipientType.CC, parse(outgoing.cc(), "Cc"));
         if (!outgoing.bcc().isEmpty()) message.setRecipients(Message.RecipientType.BCC, parse(outgoing.bcc(), "Bcc"));
@@ -76,7 +78,7 @@ public final class MessageComposer {
         try {
             return InternetAddress.parse(addresses, true);
         } catch (AddressException e) {
-            throw new MailServiceException(field + ": invalid address \"" + e.getRef() + "\".", e);
+            throw new MailServiceException(tr("compose.error.address", field, e.getRef()), e);
         }
     }
 
@@ -101,9 +103,10 @@ public final class MessageComposer {
     /** Body of a reply: attribution line and the original text quoted with "> ". */
     public static String quote(MessageContent original, String plainTextOfOriginal, String signature) {
         StringBuilder body = new StringBuilder("\n\n");
-        String date = original.date() == null ? "" : DateTimeFormatter.ofPattern("EEE, d MMM yyyy HH:mm", Locale.ENGLISH)
+        String date = original.date() == null ? "" : DateTimeFormatter.ofPattern(tr("date.full"),
+                org.datazuul.amadeos.mail.i18n.Texts.messages().locale())
                 .withZone(ZoneId.systemDefault()).format(original.date()) + ", ";
-        body.append("On ").append(date).append(original.from()).append(" wrote:\n");
+        body.append(tr("compose.quote.attribution", date, original.from())).append('\n');
         for (String line : (plainTextOfOriginal == null ? "" : plainTextOfOriginal).split("\\R", -1)) {
             body.append(line.startsWith(">") ? ">" : "> ").append(line).append('\n');
         }
@@ -113,10 +116,10 @@ public final class MessageComposer {
 
     /** Body of a forwarded message: a header block and the original text. */
     public static String forwardBody(MessageContent original, String plainTextOfOriginal, String signature) {
-        StringBuilder body = new StringBuilder("\n\n-------- Forwarded Message --------\n");
-        body.append("Subject: ").append(original.subject()).append('\n');
-        body.append("From: ").append(original.from()).append('\n');
-        body.append("To: ").append(original.to()).append('\n');
+        StringBuilder body = new StringBuilder("\n\n-------- " + tr("compose.forwarded") + " --------\n");
+        body.append(tr("header.subject")).append(' ').append(original.subject()).append('\n');
+        body.append(tr("header.from")).append(' ').append(original.from()).append('\n');
+        body.append(tr("header.to")).append(' ').append(original.to()).append('\n');
         body.append('\n').append(plainTextOfOriginal == null ? "" : plainTextOfOriginal).append('\n');
         appendSignature(body, signature);
         return body.toString();

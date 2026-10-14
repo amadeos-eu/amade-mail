@@ -1,5 +1,9 @@
 package org.datazuul.amadeos.mail.ui.messages;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
+import org.datazuul.amadeos.mail.i18n.Texts;
+
 import org.datazuul.amadeos.mail.domain.MessageSummary;
 
 import javax.swing.table.AbstractTableModel;
@@ -22,10 +26,8 @@ public final class MessageTableModel extends AbstractTableModel {
     public static final int DATE = 3;
     public static final int SIZE = 4;
 
-    private static final String[] COLUMNS = {"", "Sender", "Subject", "Date and time", "Size"};
-    private static final DateTimeFormatter TODAY = DateTimeFormatter.ofPattern("HH:mm", Locale.ENGLISH);
-    private static final DateTimeFormatter THIS_YEAR = DateTimeFormatter.ofPattern("EEE MMM d HH:mm", Locale.ENGLISH);
-    private static final DateTimeFormatter OLDER = DateTimeFormatter.ofPattern("MMM d yyyy", Locale.ENGLISH);
+    private static final String[] COLUMNS = {"", tr("column.sender"), tr("column.subject"), tr("column.date"),
+            tr("column.size")};
 
     private final List<MessageSummary> rows = new ArrayList<>();
     private boolean unified;
@@ -121,9 +123,9 @@ public final class MessageTableModel extends AbstractTableModel {
     public static String formatDate(Instant instant, ZoneId zone, LocalDate today) {
         if (instant == null) return "";
         var date = instant.atZone(zone);
-        if (date.toLocalDate().equals(today)) return TODAY.format(date);
-        if (date.getYear() == today.getYear()) return THIS_YEAR.format(date);
-        return OLDER.format(date);
+        String pattern = date.toLocalDate().equals(today) ? "date.today"
+                : date.getYear() == today.getYear() ? "date.this-year" : "date.older";
+        return DateTimeFormatter.ofPattern(tr(pattern), Texts.messages().locale()).format(date);
     }
 
     public static String formatSize(long bytes) {

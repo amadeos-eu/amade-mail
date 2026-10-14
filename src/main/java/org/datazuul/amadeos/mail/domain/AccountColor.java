@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.domain;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import java.awt.Color;
 
 /**
@@ -32,8 +34,10 @@ public enum AccountColor {
         return values[Math.floorMod(index, values.length)];
     }
 
+    /** Shown in the account settings, from {@code color.<colour>}. */
     @Override
     public String toString() {
-        return label;
+        String key = "color." + name().toLowerCase(java.util.Locale.ROOT);
+        return org.datazuul.amadeos.mail.i18n.Texts.messages().has(key) ? tr(key) : label;
     }
 }

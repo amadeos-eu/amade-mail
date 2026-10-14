@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.compose;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.OutgoingMessage;
 import org.datazuul.amadeos.commons.swing.AmadeUI;
@@ -30,20 +32,20 @@ public final class ComposeWindow extends JFrame {
     private final JTextField to = new JTextField(40);
     private final JTextField cc = new JTextField(40);
     private final JTextField bcc = new JTextField(40);
-    private final JLabel bccLabel = new JLabel("Bcc:");
+    private final JLabel bccLabel = new JLabel(tr("header.bcc"));
     private final JTextField subject = new JTextField(40);
     private final JTextArea body = new JTextArea(20, 72);
     private final DefaultListModel<Path> attachments = new DefaultListModel<>();
     private final JList<Path> attachmentList = new JList<>(attachments);
     private final JScrollPane attachmentScroll = new JScrollPane(attachmentList);
     private final JLabel status = new JLabel(" ");
-    private final JButton send = new JButton("Send");
+    private final JButton send = new JButton(tr("compose.send"));
     private final String inReplyTo;
     private final String initialBody;
     private final SendHandler handler;
 
     public ComposeWindow(List<Account> accounts, Draft draft, SendHandler handler) {
-        super(draft.subject().isBlank() ? "Mailer - New Message" : "Mailer - " + draft.subject());
+        super(tr("app.title.with", draft.subject().isBlank() ? tr("compose.new") : draft.subject()));
         this.handler = handler;
         this.inReplyTo = draft.inReplyTo();
         this.initialBody = draft.body();
@@ -83,11 +85,11 @@ public final class ComposeWindow extends JFrame {
         JPanel fields = new JPanel(new GridBagLayout());
         fields.setOpaque(false);
         int row = 0;
-        row = field(fields, row, new JLabel("From:"), from);
-        row = field(fields, row, new JLabel("To:"), to);
-        row = field(fields, row, new JLabel("Cc:"), cc);
+        row = field(fields, row, new JLabel(tr("header.from")), from);
+        row = field(fields, row, new JLabel(tr("header.to")), to);
+        row = field(fields, row, new JLabel(tr("header.cc")), cc);
         row = field(fields, row, bccLabel, bcc);
-        field(fields, row, new JLabel("Subject:"), subject);
+        field(fields, row, new JLabel(tr("header.subject")), subject);
         bcc.setVisible(false);
         bccLabel.setVisible(false);
 
@@ -100,7 +102,7 @@ public final class ComposeWindow extends JFrame {
         attachmentScroll.setVisible(false);
 
         send.addActionListener(e -> send());
-        JButton closeButton = new JButton("Close");
+        JButton closeButton = new JButton(tr("compose.close"));
         closeButton.addActionListener(e -> close());
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
         buttons.setOpaque(false);
@@ -130,18 +132,15 @@ public final class ComposeWindow extends JFrame {
 
     private JMenuBar menuBar() {
         JMenuBar bar = new JMenuBar();
-        JMenu file = new JMenu("File");
-        file.setMnemonic(KeyEvent.VK_F);
-        file.add(item("Send", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK), this::send));
+        JMenu file = org.datazuul.amadeos.commons.i18n.Mnemonics.apply(new JMenu(), tr("compose.menu.file"));
+        file.add(item(tr("compose.send"), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK), this::send));
         file.addSeparator();
-        file.add(item("Close", KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_DOWN_MASK), this::close));
-        JMenu attach = new JMenu("Attachments");
-        attach.setMnemonic(KeyEvent.VK_A);
-        attach.add(item("Add File…", null, this::addAttachment));
-        attach.add(item("Delete", null, this::removeAttachment));
-        JMenu format = new JMenu("Format");
-        format.setMnemonic(KeyEvent.VK_O);
-        JCheckBoxMenuItem showBcc = new JCheckBoxMenuItem("Show Bcc Field");
+        file.add(item(tr("compose.close"), KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_DOWN_MASK), this::close));
+        JMenu attach = org.datazuul.amadeos.commons.i18n.Mnemonics.apply(new JMenu(), tr("menu.attachments"));
+        attach.add(item(tr("compose.attach.add"), null, this::addAttachment));
+        attach.add(item(tr("compose.attach.delete"), null, this::removeAttachment));
+        JMenu format = org.datazuul.amadeos.commons.i18n.Mnemonics.apply(new JMenu(), tr("compose.menu.format"));
+        JCheckBoxMenuItem showBcc = new JCheckBoxMenuItem(tr("compose.show-bcc"));
         showBcc.addActionListener(e -> {
             bcc.setVisible(showBcc.isSelected());
             bccLabel.setVisible(showBcc.isSelected());
@@ -195,7 +194,7 @@ public final class ComposeWindow extends JFrame {
         Account account = (Account) from.getSelectedItem();
         if (account == null) return;
         if (subject.getText().isBlank()) {
-            int answer = JOptionPane.showConfirmDialog(this, "Send this message without a subject?", "Mailer",
+            int answer = JOptionPane.showConfirmDialog(this, tr("compose.no-subject"), tr("app.title"),
                     JOptionPane.OK_CANCEL_OPTION);
             if (answer != JOptionPane.OK_OPTION) return;
         }
@@ -204,7 +203,7 @@ public final class ComposeWindow extends JFrame {
         OutgoingMessage message = new OutgoingMessage(account, to.getText(), cc.getText(),
                 bcc.isVisible() ? bcc.getText() : "", subject.getText(), body.getText(), files, inReplyTo);
         send.setEnabled(false);
-        status.setText("Sending via " + account.smtp().host() + " …");
+        status.setText(tr("compose.sending", account.smtp().host()));
         handler.send(message, this);
     }
 
@@ -216,14 +215,14 @@ public final class ComposeWindow extends JFrame {
     /** Called by the presenter if sending failed; the message stays open for another try. */
     public void failed(String message) {
         send.setEnabled(true);
-        status.setText("Not sent: " + message);
-        JOptionPane.showMessageDialog(this, message, "Mailer - Send failed", JOptionPane.ERROR_MESSAGE);
+        status.setText(tr("compose.not-sent", message));
+        JOptionPane.showMessageDialog(this, message, tr("app.title.with", tr("compose.failed")), JOptionPane.ERROR_MESSAGE);
     }
 
     private void close() {
         boolean changed = !body.getText().equals(initialBody) || !attachments.isEmpty();
         if (changed) {
-            int answer = JOptionPane.showConfirmDialog(this, "Discard this message?", "Mailer",
+            int answer = JOptionPane.showConfirmDialog(this, tr("compose.discard"), tr("app.title"),
                     JOptionPane.OK_CANCEL_OPTION);
             if (answer != JOptionPane.OK_OPTION) return;
         }

@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.main;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import com.google.inject.Inject;
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.FolderRole;
@@ -109,8 +111,8 @@ public final class MainPresenter implements MessageViewActions {
     // ---- start and accounts ---------------------------------------------------------------------
 
     public void start(List<String> arguments) {
-        accounts = loadSafely(accountRepository::load, List.of(), "accounts");
-        preferences = loadSafely(preferencesRepository::load, MailPreferences.DEFAULTS, "preferences");
+        accounts = loadSafely(accountRepository::load, List.of(), "error.load.accounts");
+        preferences = loadSafely(preferencesRepository::load, MailPreferences.DEFAULTS, "error.load.preferences");
         showHtml = preferences.preferHtml();
         view.setShowHtml(showHtml);
         accounts.forEach(a -> states.put(a.id(), AccountState.LOADING));
@@ -118,7 +120,7 @@ public final class MainPresenter implements MessageViewActions {
         view.setContext("");
         scheduleCheck();
         if (accounts.isEmpty()) {
-            view.setStatus("No mail account configured.");
+            view.setStatus(tr("status.no-account"));
             openOptions(OptionsDialog.ACCOUNTS, true);
         } else {
             refreshFolders(accounts);
@@ -133,7 +135,7 @@ public final class MainPresenter implements MessageViewActions {
             return loader.get();
         } catch (RuntimeException e) {
             LOG.error("Cannot load {}", what, e);
-            view.showError("Cannot load the " + what + ": " + e.getMessage());
+            view.showError(tr(what, e.getMessage()));
             return fallback;
         }
     }
@@ -209,7 +211,7 @@ public final class MainPresenter implements MessageViewActions {
             accountRepository.save(edited);
             preferencesRepository.save(newPreferences);
         } catch (RuntimeException e) {
-            view.showError("Cannot save the settings: " + e.getMessage());
+            view.showError(tr("error.save.settings", e.getMessage()));
         }
         accounts = List.copyOf(edited);
         if (newPreferences.preferHtml() != preferences.preferHtml()) setShowHtml(newPreferences.preferHtml());
@@ -235,13 +237,12 @@ public final class MainPresenter implements MessageViewActions {
                     if (e.isAuthenticationFailure()) credentials.rejected(account);
                     throw e;
                 }
-                return "Connection OK: signed in with " + account.auth().provider().label()
-                        + ", IMAP and SMTP login succeeded.";
+                return tr("test.ok.oauth", account.auth().provider().label());
             }
             String password = passwordOrNull != null ? passwordOrNull : passwordStore.lookup(account.id())
-                    .orElseThrow(() -> new MailServiceException("Enter the password first."));
+                    .orElseThrow(() -> new MailServiceException(tr("test.no-password")));
             gateway.testConnection(account, password);
-            return "Connection OK: IMAP and SMTP login succeeded.";
+            return tr("test.ok");
         }, result, result);
     }
 
@@ -256,7 +257,7 @@ public final class MainPresenter implements MessageViewActions {
         if (item == null) return;
         switch (item) {
             case TreeItem.UnifiedInbox u -> {
-                view.setContext("All inboxes");
+                view.setContext(tr("folders.all-inboxes"));
                 loadUnified(generation);
             }
             case TreeItem.FolderItem f when f.folder().selectable() -> {
@@ -266,7 +267,7 @@ public final class MainPresenter implements MessageViewActions {
             case TreeItem.FolderItem f -> {
                 view.setContext(f.account().label() + " - " + f.folder().fullName());
                 view.showMessages(List.of(), false);
-                view.setStatus("This folder only contains other folders.");
+                view.setStatus(tr("status.folders-only"));
             }
             case TreeItem.AccountItem a -> {
                 view.setContext(a.account().label());
@@ -277,7 +278,7 @@ public final class MainPresenter implements MessageViewActions {
     }
 
     private void loadFolder(int generation, Account account, MailFolder folder) {
-        view.setStatus("Loading " + folder.name() + " …");
+        view.setStatus(tr("status.loading", folder.name()));
         async(() -> gateway.listMessages(account, folder.fullName(), MESSAGE_LIMIT), messages -> {
             if (generation != listGeneration) return;
             view.showMessages(messages, false);
@@ -290,7 +291,7 @@ public final class MainPresenter implements MessageViewActions {
     }
 
     private void loadUnified(int generation) {
-        view.setStatus("Loading all inboxes …");
+        view.setStatus(tr("status.loading-all"));
         Map<Account, CompletableFuture<List<MessageSummary>>> futures = new LinkedHashMap<>();
         for (Account account : accounts) {
             String inbox = state(account.id()).folder(FolderRole.INBOX).map(MailFolder::fullName).orElse("INBOX");
@@ -324,9 +325,9 @@ public final class MainPresenter implements MessageViewActions {
      */
     static String loadedStatus(List<MessageSummary> messages, int total) {
         long unread = messages.stream().filter(m -> !m.seen()).count();
-        String text = "Loaded " + messages.size() + " messages, " + unread + " new";
+        String text = tr("status.loaded", messages.size(), unread);
         boolean truncated = messages.size() >= MESSAGE_LIMIT && total > messages.size();
-        return truncated ? text + " (newest " + messages.size() + " of " + total + ")" : text;
+        return truncated ? text + " " + tr("status.newest", messages.size(), total) : text;
     }
 
     public void checkMail() {
@@ -413,7 +414,7 @@ public final class MainPresenter implements MessageViewActions {
 
     @Override
     public void loadRemoteImagesOnce() {
-        view.setStatus("Loading remote images …");
+        view.setStatus(tr("status.loading-images"));
         redisplay(true);
     }
 
@@ -424,7 +425,7 @@ public final class MainPresenter implements MessageViewActions {
         try {
             preferencesRepository.save(preferences);
         } catch (RuntimeException e) {
-            view.showError("Cannot save the preferences: " + e.getMessage());
+            view.showError(tr("error.save.preferences", e.getMessage()));
         }
         loadRemoteImagesOnce();
     }
@@ -438,22 +439,21 @@ public final class MainPresenter implements MessageViewActions {
         }
         String lower = uri.toLowerCase(Locale.ROOT);
         if (!lower.startsWith("http://") && !lower.startsWith("https://")) {
-            view.setStatus("Link not opened: " + uri);
+            view.setStatus(tr("link.not-opened", uri));
             return;
         }
-        if (!view.confirm("Open this link in the web browser?\n\n" + uri)) return;
+        if (!view.confirm(tr("link.confirm", uri))) return;
         try {
             desktop.browse(uri);
         } catch (IOException | RuntimeException e) {
-            view.showError("Cannot open the link: " + e.getMessage());
+            view.showError(tr("link.error", e.getMessage()));
         }
     }
 
     @Override
     public void openAttachment(Attachment attachment) {
         if (DesktopLauncher.isRisky(attachment.fileName())) {
-            view.showError("\"" + attachment.fileName() + "\" could run a program and is not opened directly.\n"
-                    + "Save it first if you trust the sender.");
+            view.showError(tr("attachment.risky", attachment.fileName()));
             return;
         }
         async(() -> {
@@ -461,10 +461,10 @@ public final class MainPresenter implements MessageViewActions {
             try {
                 desktop.open(file);
             } catch (IOException e) {
-                throw new MailServiceException("Cannot open " + file.getFileName() + ": " + e.getMessage(), e);
+                throw new MailServiceException(tr("attachment.error.open", file.getFileName().toString(), e.getMessage()), e);
             }
             return file;
-        }, file -> view.setStatus("Opened " + file.getFileName()), view::showError);
+        }, file -> view.setStatus(tr("attachment.opened", file.getFileName().toString())), view::showError);
     }
 
     private synchronized Path writeTemporary(Attachment attachment) {
@@ -477,7 +477,7 @@ public final class MainPresenter implements MessageViewActions {
             directory.toFile().deleteOnExit();
             return file;
         } catch (IOException e) {
-            throw new MailServiceException("Cannot write the attachment: " + e.getMessage(), e);
+            throw new MailServiceException(tr("attachment.error.write", e.getMessage()), e);
         }
     }
 
@@ -496,9 +496,9 @@ public final class MainPresenter implements MessageViewActions {
                 Files.write(target, attachment.data());
                 return target;
             } catch (IOException e) {
-                throw new MailServiceException("Cannot save " + target + ": " + e.getMessage(), e);
+                throw new MailServiceException(tr("attachments.error.save", target.toString(), e.getMessage()), e);
             }
-        }, file -> view.setStatus("Saved " + file), view::showError);
+        }, file -> view.setStatus(tr("attachment.saved", file.toString())), view::showError);
     }
 
     public void showSource() {
@@ -528,7 +528,7 @@ public final class MainPresenter implements MessageViewActions {
         if (selected.isEmpty()) return;
         Map<String, List<MessageSummary>> groups = groupByFolder(selected);
         boolean permanent = groups.values().stream().anyMatch(g -> trashFor(g.getFirst()).isEmpty());
-        if (permanent && !view.confirm("Delete " + selected.size() + " message(s) permanently?")) return;
+        if (permanent && !view.confirm(tr("delete.confirm", selected.size()))) return;
         view.removeMessages(selected);
         for (List<MessageSummary> group : groups.values()) {
             MessageSummary first = group.getFirst();
@@ -577,7 +577,7 @@ public final class MainPresenter implements MessageViewActions {
                 gateway.move(account, from, uids, target.fullName());
                 return null;
             }, ignored -> {
-                view.setStatus(uids.size() + " message(s) moved to " + target.name());
+                view.setStatus(tr("move.done", uids.size(), target.name()));
                 refreshCounts(account, from, target.fullName());
             }, this::operationFailed);
         }
@@ -649,7 +649,7 @@ public final class MainPresenter implements MessageViewActions {
     public void composeNew() {
         Optional<Account> account = currentAccount();
         if (account.isEmpty()) {
-            view.showError("Set up a mail account first (Mailbox → Mail Options).");
+            view.showError(tr("compose.no-account"));
             return;
         }
         view.openCompose(accounts, Draft.empty(account.get().id(), MessageComposer.newBody(account.get().signature())));
@@ -658,7 +658,7 @@ public final class MainPresenter implements MessageViewActions {
     private void compose(MailtoLink link) {
         Optional<Account> account = currentAccount();
         if (account.isEmpty()) {
-            view.showError("Set up a mail account first (Mailbox → Mail Options).");
+            view.showError(tr("compose.no-account"));
             return;
         }
         String body = link.body() + MessageComposer.newBody(account.get().signature());
@@ -699,7 +699,7 @@ public final class MainPresenter implements MessageViewActions {
     private DisplayedMessage displayedSelection() {
         MessageSummary selected = view.selectedMessage();
         if (displayed == null || selected == null || !displayed.summary().sameMessage(selected)) {
-            view.setStatus("Select a message first.");
+            view.setStatus(tr("status.select-message"));
             return null;
         }
         return displayed;
@@ -713,7 +713,7 @@ public final class MainPresenter implements MessageViewActions {
             return null;
         }, ignored -> {
             window.sent();
-            view.setStatus("Message sent.");
+            view.setStatus(tr("status.sent"));
             if (sent != null) refreshCounts(message.account(), sent);
         }, error -> window.failed(error), SentCopyFailedException.class, e -> {
             window.sent();
@@ -724,7 +724,7 @@ public final class MainPresenter implements MessageViewActions {
     // ---- exit -----------------------------------------------------------------------------------
 
     public void exit() {
-        if (view.hasOpenComposeWindows() && !view.confirm("Discard the messages you are writing and exit?")) return;
+        if (view.hasOpenComposeWindows() && !view.confirm(tr("exit.discard"))) return;
         if (checkTimer != null) checkTimer.stop();
         view.dispose();
         executor.execute(gateway::close);
