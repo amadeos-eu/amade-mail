@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.folders;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.FolderRole;
 import org.datazuul.amadeos.mail.domain.MailFolder;
@@ -23,7 +25,7 @@ public final class FolderTreeBuilder {
             .thenComparing(f -> f.name().toLowerCase(Locale.ROOT));
 
     public DefaultMutableTreeNode build(List<Account> accounts, Map<String, AccountState> states) {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Folders");
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(tr("folders.title"));
         if (accounts.size() > 1) {
             int unread = 0;
             for (Account account : accounts) {

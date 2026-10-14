@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.options;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.MailPreferences;
 
 import javax.swing.*;
@@ -12,9 +14,9 @@ import java.util.stream.Collectors;
  * "Message View" category of Mail Options.
  */
 public final class MessageViewOptionsPanel extends JPanel {
-    private final JRadioButton plain = new JRadioButton("Plain text");
-    private final JRadioButton html = new JRadioButton("HTML (sanitised, without scripts)");
-    private final JCheckBox alwaysRemote = new JCheckBox("Always load remote images (allows tracking)");
+    private final JRadioButton plain = new JRadioButton(tr("view.plain"));
+    private final JRadioButton html = new JRadioButton(tr("view.html"));
+    private final JCheckBox alwaysRemote = new JCheckBox(tr("view.always-remote"));
     private final JTextArea trusted = new JTextArea(5, 30);
     private final JSpinner interval = new JSpinner(new SpinnerNumberModel(5, 0, 1440, 1));
 
@@ -32,20 +34,20 @@ public final class MessageViewOptionsPanel extends JPanel {
         c.insets = new Insets(3, 0, 3, 0);
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1;
-        add(new JLabel("Show messages that contain both formats as:"), c);
+        add(new JLabel(tr("view.both-formats")), c);
         add(plain, c);
         add(html, c);
         c.insets = new Insets(12, 0, 3, 0);
         add(alwaysRemote, c);
         c.insets = new Insets(3, 0, 3, 0);
-        add(new JLabel("Always load remote images from these senders (one address per line):"), c);
+        add(new JLabel(tr("view.trusted-senders")), c);
         trusted.setLineWrap(false);
         add(new JScrollPane(trusted), c);
         JPanel intervalRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         intervalRow.setOpaque(false);
-        intervalRow.add(new JLabel("Check for new mail every"));
+        intervalRow.add(new JLabel(tr("view.check-every")));
         intervalRow.add(interval);
-        intervalRow.add(new JLabel("minutes (0 = never)"));
+        intervalRow.add(new JLabel(tr("view.minutes")));
         c.insets = new Insets(12, 0, 3, 0);
         add(intervalRow, c);
         c.weighty = 1;

@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.service;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import com.google.inject.Inject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -134,7 +136,7 @@ public final class OAuth2Service {
         try {
             server = HttpServer.create(new InetSocketAddress(InetAddress.getByName("127.0.0.1"), 0), 0);
         } catch (IOException e) {
-            throw new MailServiceException("Cannot listen for the sign-in redirect: " + e.getMessage(), e);
+            throw new MailServiceException(tr("oauth.error.listen", e.getMessage()), e);
         }
         server.createContext("/", exchange -> handleRedirect(exchange, state, callback));
         server.start();
@@ -144,7 +146,7 @@ public final class OAuth2Service {
             browser.accept(authorizationUri(provider, client, redirectUri, state, challenge(verifier), account.username()));
             Map<String, String> result = callback.get(SIGN_IN_TIMEOUT.toSeconds(), TimeUnit.SECONDS);
             if (result.containsKey("error")) {
-                throw new MailServiceException(provider.label() + " sign-in failed: " + result.get("error") + ".");
+                throw new MailServiceException(tr("oauth.error.sign-in", provider.label(), String.valueOf(result.get("error"))));
             }
             Map<String, String> form = new LinkedHashMap<>();
             form.put("grant_type", "authorization_code");
@@ -156,15 +158,14 @@ public final class OAuth2Service {
             if (answer.containsKey("error")) throw tokenError(provider, answer);
             return accept(account, answer);
         } catch (CancellationException e) {
-            throw new MailServiceException(account.label() + ": sign-in cancelled.", e);
+            throw new MailServiceException(tr("oauth.cancelled", account.label()), e);
         } catch (TimeoutException e) {
-            throw new MailServiceException(account.label() + ": sign-in not completed within "
-                    + SIGN_IN_TIMEOUT.toMinutes() + " minutes.", e);
+            throw new MailServiceException(tr("oauth.timeout", account.label(), SIGN_IN_TIMEOUT.toMinutes()), e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailServiceException(account.label() + ": sign-in interrupted.", e);
+            throw new MailServiceException(tr("oauth.interrupted", account.label()), e);
         } catch (ExecutionException e) {
-            throw new MailServiceException(account.label() + ": sign-in failed.", e.getCause());
+            throw new MailServiceException(tr("oauth.failed", account.label()), e.getCause());
         } finally {
             server.stop(0);
         }
@@ -226,7 +227,7 @@ public final class OAuth2Service {
 
     private String accept(Account account, Map<String, Object> answer) {
         if (!(answer.get("access_token") instanceof String accessToken) || accessToken.isEmpty()) {
-            throw new MailServiceException(account.auth().provider().label() + " sent no access token.");
+            throw new MailServiceException(tr("oauth.error.no-token", account.auth().provider().label()));
         }
         long seconds = answer.get("expires_in") instanceof Number n ? n.longValue() : 3600;
         accessTokens.put(account.id(), new AccessToken(accessToken, clock.instant().plusSeconds(seconds)));
@@ -241,17 +242,17 @@ public final class OAuth2Service {
         try {
             response = poster.post(provider.tokenUri(), form);
         } catch (IOException e) {
-            throw new MailServiceException(provider.label() + " cannot be reached: " + e.getMessage(), e);
+            throw new MailServiceException(tr("oauth.error.unreachable", provider.label(), e.getMessage()), e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new MailServiceException(provider.label() + ": request interrupted.", e);
+            throw new MailServiceException(tr("oauth.error.interrupted", provider.label()), e);
         }
         try {
             Map<String, Object> answer = Json.parseObject(response.body());
             if (response.status() / 100 != 2 && !answer.containsKey("error")) answer.put("error", "http_" + response.status());
             return answer;
         } catch (IllegalArgumentException e) {
-            throw new MailServiceException(provider.label() + " sent an unreadable answer (HTTP " + response.status() + ").", e);
+            throw new MailServiceException(tr("oauth.error.unreadable", provider.label(), String.valueOf(response.status())), e);
         }
     }
 
@@ -259,9 +260,9 @@ public final class OAuth2Service {
         Object description = answer.get("error_description");
         Object error = answer.get("error");
         String fix = "invalid_client".equals(error) || "unauthorized_client".equals(error)
-                ? " Check client ID and secret in ~/.config/amadeos/mail/oauth2.conf." : "";
-        return new MailServiceException(provider.label() + " refused the token request: " + error
-                + (description != null ? " (" + description + ")" : "") + "." + fix, null, true);
+                ? " " + tr("oauth.error.check-client") : "";
+        return new MailServiceException(tr("oauth.error.refused", provider.label(),
+                error + (description != null ? " (" + description + ")" : "")) + fix, null, true);
     }
 
     private static void handleRedirect(HttpExchange exchange, String state, CompletableFuture<Map<String, String>> callback)

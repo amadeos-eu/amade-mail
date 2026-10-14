@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.view;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.MessageContent;
 import org.datazuul.amadeos.mail.domain.MessageContent.Attachment;
 import org.datazuul.amadeos.mail.ui.messages.MessageTableModel;
@@ -17,8 +19,11 @@ import java.util.Locale;
  * the attachment bar.
  */
 public final class MessageViewPanel extends JPanel {
-    private static final DateTimeFormatter DATE = DateTimeFormatter
-            .ofPattern("EEE, d MMM yyyy HH:mm", Locale.ENGLISH).withZone(ZoneId.systemDefault());
+    /** The date in the header, e.g. "Tue, 13 Oct 2026 08:12", written the way the language writes it. */
+    private static DateTimeFormatter dateFormat() {
+        return DateTimeFormatter.ofPattern(tr("date.full"), org.datazuul.amadeos.mail.i18n.Texts.messages().locale())
+                .withZone(ZoneId.systemDefault());
+    }
 
     private final MessageViewActions actions;
     private final JPanel headers = new JPanel(new GridBagLayout());
@@ -40,9 +45,9 @@ public final class MessageViewPanel extends JPanel {
         headers.setBorder(BorderFactory.createEmptyBorder(4, 8, 4, 8));
         AmadeUI.style(remoteBar, (panel, theme) -> panel.setBackground(theme.softHighlight()));
         remoteBar.add(remoteLabel);
-        JButton once = new JButton("Load images");
+        JButton once = new JButton(tr("view.load-images"));
         once.addActionListener(e -> actions.loadRemoteImagesOnce());
-        JButton always = new JButton("Always for this sender");
+        JButton always = new JButton(tr("view.always-sender"));
         always.addActionListener(e -> actions.alwaysLoadRemoteImagesFromSender());
         remoteBar.add(once);
         remoteBar.add(always);
@@ -67,7 +72,7 @@ public final class MessageViewPanel extends JPanel {
         AmadeUI.style(attachmentBar, (panel, theme) -> panel.setBackground(theme.fieldBackground()));
         attachmentBar.setBorder(BorderFactory.createCompoundBorder(AmadeUI.sunken(),
                 BorderFactory.createEmptyBorder(2, 8, 2, 8)));
-        JLabel attachmentTitle = new JLabel("Attachments");
+        JLabel attachmentTitle = new JLabel(tr("menu.attachments").replace("&", ""));
         attachmentTitle.setFont(attachmentTitle.getFont().deriveFont(Font.PLAIN, 11f));
         attachmentBar.add(attachmentTitle, BorderLayout.WEST);
         attachments.setOpaque(false);
@@ -97,17 +102,17 @@ public final class MessageViewPanel extends JPanel {
         MessageContent c = message.content();
         headers.removeAll();
         int row = 0;
-        row = header(row, "From:", c.from());
-        row = header(row, "Date:", c.date() == null ? "" : DATE.format(c.date()));
-        row = header(row, "To:", c.to());
-        if (!c.cc().isBlank()) row = header(row, "Cc:", c.cc());
-        header(row, "Subject:", c.subject());
+        row = header(row, tr("header.from"), c.from());
+        row = header(row, tr("header.date"), c.date() == null ? "" : dateFormat().format(c.date()));
+        row = header(row, tr("header.to"), c.to());
+        if (!c.cc().isBlank()) row = header(row, tr("header.cc"), c.cc());
+        header(row, tr("header.subject"), c.subject());
         headers.revalidate();
         headers.repaint();
 
         boolean blocked = message.showsHtml() && message.html().hasBlockedRemoteContent();
         remoteLabel.setText(blocked
-                ? message.html().blockedRemote() + " remote image(s) blocked to protect your privacy."
+                ? tr("view.blocked", message.html().blockedRemote())
                 : "");
         remoteBar.setVisible(blocked);
 
@@ -117,7 +122,7 @@ public final class MessageViewPanel extends JPanel {
                 cards.show(body, "html");
             } catch (RuntimeException e) {
                 LoggerFactory.getLogger(MessageViewPanel.class).warn("HTML rendering failed", e);
-                showText("[The HTML part could not be displayed: " + e.getMessage() + "]\n\n" + message.plainText());
+                showText("[" + tr("view.html-failed", e.getMessage()) + "]\n\n" + message.plainText());
             }
         } else {
             showText(message.plainText());
@@ -161,7 +166,7 @@ public final class MessageViewPanel extends JPanel {
         v.setBorder(BorderFactory.createEmptyBorder());
         // Read-only fields would get the panel colour; they sit on the white header block.
         AmadeUI.style(v, (field, theme) -> field.setBackground(theme.fieldBackground()));
-        v.setFont(v.getFont().deriveFont("Subject:".equals(label) ? Font.BOLD : Font.PLAIN));
+        v.setFont(v.getFont().deriveFont(tr("header.subject").equals(label) ? Font.BOLD : Font.PLAIN));
         v.setCaretPosition(0);
         headers.add(v, c);
         return row + 1;
@@ -172,9 +177,9 @@ public final class MessageViewPanel extends JPanel {
                 UIManager.getIcon("FileView.fileIcon"));
         button.setToolTipText(attachment.mimeType());
         JPopupMenu menu = new JPopupMenu();
-        JMenuItem open = new JMenuItem("Open");
+        JMenuItem open = new JMenuItem(tr("attachment.open"));
         open.addActionListener(e -> actions.openAttachment(attachment));
-        JMenuItem save = new JMenuItem("Save As…");
+        JMenuItem save = new JMenuItem(tr("attachment.save-as"));
         save.addActionListener(e -> actions.saveAttachment(attachment));
         menu.add(open);
         menu.add(save);

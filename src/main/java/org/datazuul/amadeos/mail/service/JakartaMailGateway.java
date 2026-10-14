@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.service;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import com.google.inject.Inject;
 import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.FetchProfile;
@@ -378,7 +380,7 @@ public final class JakartaMailGateway implements MailGateway {
         } catch (MessagingException e) {
             throw failure("SMTP", smtp, account.auth(), e);
         } catch (IOException e) {
-            throw new MailServiceException("Cannot read attachment: " + e.getMessage(), e);
+            throw new MailServiceException(tr("mail.error.attachment", e.getMessage()), e);
         }
         if (sentFolder == null) return;
         try {
@@ -388,8 +390,7 @@ public final class JakartaMailGateway implements MailGateway {
                 return null;
             });
         } catch (MailServiceException e) {
-            throw new SentCopyFailedException("Message sent, but the copy could not be saved in "
-                    + sentFolder + ": " + e.getMessage(), e);
+            throw new SentCopyFailedException(tr("mail.error.sent-copy", sentFolder, e.getMessage()), e);
         }
     }
 
@@ -400,14 +401,14 @@ public final class JakartaMailGateway implements MailGateway {
         try {
             folder.open(mode);
         } catch (FolderNotFoundException e) {
-            throw new MailServiceException("Folder " + name + " no longer exists.", e);
+            throw new MailServiceException(tr("mail.error.folder-gone", name), e);
         }
         return folder;
     }
 
     private static Message byUid(Folder folder, long uid) throws MessagingException {
         Message message = ((UIDFolder) folder).getMessageByUID(uid);
-        if (message == null) throw new MailServiceException("The message no longer exists on the server.");
+        if (message == null) throw new MailServiceException(tr("mail.error.message-gone"));
         return message;
     }
 
@@ -439,20 +440,19 @@ public final class JakartaMailGateway implements MailGateway {
         if (e instanceof MailServiceException mse) return mse;
         boolean auth = e instanceof AuthenticationFailedException;
         String reason = !auth ? reason(e, server)
-                : method.isOAuth2() ? "Login with the " + method.provider().label()
-                        + " access token failed. Check that the user name is the signed-in address."
-                : "Login failed. Check user name and password.";
+                : method.isOAuth2() ? tr("mail.error.oauth-login", method.provider().label())
+                : tr("mail.error.login");
         LOG.warn("{} {} failed: {}", protocol, server.describe(), e.toString());
         return new MailServiceException(protocol + " " + server.host() + ": " + reason, e, auth);
     }
 
     private static String reason(Throwable e, ServerSettings server) {
         for (Throwable t = e; t != null; t = t.getCause()) {
-            if (t instanceof UnknownHostException) return "Server not found.";
-            if (t instanceof ConnectException) return "Connection refused on port " + server.port() + ".";
-            if (t instanceof SocketTimeoutException) return "The server did not answer in time.";
-            if (t instanceof CertificateException) return "The server certificate is not trusted.";
-            if (t instanceof SSLException) return "TLS handshake failed (" + t.getMessage() + ").";
+            if (t instanceof UnknownHostException) return tr("mail.error.unknown-host");
+            if (t instanceof ConnectException) return tr("mail.error.refused", String.valueOf(server.port()));
+            if (t instanceof SocketTimeoutException) return tr("mail.error.timeout");
+            if (t instanceof CertificateException) return tr("mail.error.certificate");
+            if (t instanceof SSLException) return tr("mail.error.tls", t.getMessage());
         }
         String message = e.getMessage();
         return message == null || message.isBlank() ? e.getClass().getSimpleName() : message;

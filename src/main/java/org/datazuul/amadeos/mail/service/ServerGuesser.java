@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.service;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.AuthMethod;
 import org.datazuul.amadeos.mail.domain.ConnectionSecurity;
 import org.datazuul.amadeos.mail.domain.ServerSettings;
@@ -19,7 +21,7 @@ public final class ServerGuesser {
     public record Guess(ServerSettings imap, ServerSettings smtp, String username, AuthMethod auth, String hint) {
     }
 
-    private static final String GMAIL_HINT = "Press \"Test connection\" to sign in with Google in the web browser.";
+    private static final String GMAIL_HINT = tr("accounts.hint.oauth", "Google");
 
     private static final Map<String, Guess> PROVIDERS = Map.ofEntries(
             provider("gmail.com", "imap.gmail.com", 993, ConnectionSecurity.TLS, "smtp.gmail.com", 465,
@@ -27,19 +29,19 @@ public final class ServerGuesser {
             provider("googlemail.com", "imap.gmail.com", 993, ConnectionSecurity.TLS, "smtp.gmail.com", 465,
                     ConnectionSecurity.TLS, AuthMethod.OAUTH2_GOOGLE, GMAIL_HINT),
             provider("gmx.de", "imap.gmx.net", 993, ConnectionSecurity.TLS, "mail.gmx.net", 587,
-                    ConnectionSecurity.STARTTLS, "Enable IMAP access in the GMX web settings first."),
+                    ConnectionSecurity.STARTTLS, tr("guess.enable-imap", "GMX")),
             provider("gmx.net", "imap.gmx.net", 993, ConnectionSecurity.TLS, "mail.gmx.net", 587,
-                    ConnectionSecurity.STARTTLS, "Enable IMAP access in the GMX web settings first."),
+                    ConnectionSecurity.STARTTLS, tr("guess.enable-imap", "GMX")),
             provider("web.de", "imap.web.de", 993, ConnectionSecurity.TLS, "smtp.web.de", 587,
-                    ConnectionSecurity.STARTTLS, "Enable IMAP access in the WEB.DE web settings first."),
+                    ConnectionSecurity.STARTTLS, tr("guess.enable-imap", "WEB.DE")),
             provider("t-online.de", "secureimap.t-online.de", 993, ConnectionSecurity.TLS, "securesmtp.t-online.de",
-                    465, ConnectionSecurity.TLS, "Use the separate e-mail password from the Telekom customer centre."),
+                    465, ConnectionSecurity.TLS, tr("guess.telekom")),
             provider("posteo.de", "posteo.de", 993, ConnectionSecurity.TLS, "posteo.de", 587,
                     ConnectionSecurity.STARTTLS, ""),
             provider("mailbox.org", "imap.mailbox.org", 993, ConnectionSecurity.TLS, "smtp.mailbox.org", 465,
                     ConnectionSecurity.TLS, ""),
             provider("icloud.com", "imap.mail.me.com", 993, ConnectionSecurity.TLS, "smtp.mail.me.com", 587,
-                    ConnectionSecurity.STARTTLS, "iCloud requires an app-specific password."));
+                    ConnectionSecurity.STARTTLS, tr("guess.icloud")));
 
     public Optional<Guess> guess(String email) {
         if (email == null) return Optional.empty();
@@ -56,7 +58,7 @@ public final class ServerGuesser {
                 new ServerSettings("smtp." + domain, 587, ConnectionSecurity.STARTTLS),
                 email.strip(),
                 AuthMethod.PASSWORD,
-                "Guessed from the domain; use \"Test connection\" to check."));
+                tr("guess.from-domain")));
     }
 
     private static Map.Entry<String, Guess> provider(String domain, String imapHost, int imapPort,

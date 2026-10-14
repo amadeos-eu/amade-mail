@@ -1,5 +1,9 @@
 package org.datazuul.amadeos.mail.ui.main;
 
+import com.google.inject.Inject;
+import org.datazuul.amadeos.commons.i18n.LocaleSettings;
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.Account;
 import org.datazuul.amadeos.mail.domain.MailPreferences;
 import org.datazuul.amadeos.mail.domain.MessageContent.Attachment;
@@ -45,8 +49,12 @@ public final class MainWindow extends JFrame implements MainView {
     private List<Account> accounts = List.of();
     private int dividerLocation = 210;
 
-    public MainWindow() {
-        super("Mailer");
+    private final LocaleSettings locales;
+
+    @Inject
+    public MainWindow(LocaleSettings locales) {
+        super(tr("app.title"));
+        this.locales = locales;
         EdtExecutor.requireEdt();
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setIconImage(new ImageIcon(getClass().getResource("/icons/amade-mail.png")).getImage());
@@ -110,11 +118,11 @@ public final class MainWindow extends JFrame implements MainView {
         list.setSelectionListener(presenter::messageSelected);
         list.setAccountColors(id -> accounts.stream().filter(a -> a.id().equals(id)).findFirst()
                 .map(a -> a.color().color()).orElse(null));
-        list.addButton("Delete", presenter::deleteSelected);
-        list.addButton("Next", presenter::next);
-        list.addButton("Previous", presenter::previous);
-        list.addButton("Reply to Sender", () -> presenter.reply(false));
-        list.addButton("Forward", presenter::forward);
+        list.addButton(tr("menu.message.delete"), presenter::deleteSelected);
+        list.addButton(tr("menu.view.next"), presenter::next);
+        list.addButton(tr("menu.view.previous"), presenter::previous);
+        list.addButton(tr("menu.compose.reply"), () -> presenter.reply(false));
+        list.addButton(tr("menu.compose.forward"), presenter::forward);
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -190,7 +198,7 @@ public final class MainWindow extends JFrame implements MainView {
 
     @Override
     public void setContext(String title) {
-        setTitle(title == null || title.isBlank() ? "Mailer" : "Mailer - " + title);
+        setTitle(title == null || title.isBlank() ? tr("app.title") : tr("app.title.with", title));
     }
 
     @Override
@@ -200,18 +208,18 @@ public final class MainWindow extends JFrame implements MainView {
 
     @Override
     public void showError(String message) {
-        JOptionPane.showMessageDialog(this, message, "Mailer", JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(this, message, tr("app.title"), JOptionPane.ERROR_MESSAGE);
     }
 
     @Override
     public boolean confirm(String message) {
-        return JOptionPane.showConfirmDialog(this, message, "Mailer", JOptionPane.OK_CANCEL_OPTION)
+        return JOptionPane.showConfirmDialog(this, message, tr("app.title"), JOptionPane.OK_CANCEL_OPTION)
                 == JOptionPane.OK_OPTION;
     }
 
     @Override
     public void openOptions(List<Account> accounts, MailPreferences preferences, String page, boolean addAccount) {
-        OptionsDialog dialog = new OptionsDialog(this, presenter::testConnection, presenter::applyOptions);
+        OptionsDialog dialog = new OptionsDialog(this, presenter::testConnection, presenter::applyOptions, locales);
         dialog.open(accounts, preferences, page, addAccount);
     }
 
@@ -229,7 +237,7 @@ public final class MainWindow extends JFrame implements MainView {
         chooser.setSelectedFile(new File(chooser.getCurrentDirectory(), suggestedName));
         if (chooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return null;
         File file = chooser.getSelectedFile();
-        if (file.exists() && !confirm(file.getName() + " already exists. Replace it?")) return null;
+        if (file.exists() && !confirm(tr("file.replace", file.getName()))) return null;
         return file.toPath();
     }
 
@@ -260,7 +268,7 @@ public final class MainWindow extends JFrame implements MainView {
 
     void saveAllAttachments() {
         if (displayed == null || displayed.content().attachments().isEmpty()) {
-            setStatus("The message has no attachments.");
+            setStatus(tr("attachments.none"));
             return;
         }
         JFileChooser chooser = new JFileChooser();
@@ -275,11 +283,11 @@ public final class MainWindow extends JFrame implements MainView {
                 java.nio.file.Files.write(target, attachment.data());
                 saved++;
             } catch (java.io.IOException e) {
-                showError("Cannot save " + target + ": " + e.getMessage());
+                showError(tr("attachments.error.save", target.toString(), e.getMessage()));
                 return;
             }
         }
-        setStatus("Saved " + saved + " attachment(s) to " + directory + " (existing files were kept).");
+        setStatus(tr("attachments.saved", saved, directory.toString()));
     }
 
     void setFoldersVisible(boolean visible) {
@@ -290,12 +298,7 @@ public final class MainWindow extends JFrame implements MainView {
     }
 
     void showAbout() {
-        JOptionPane.showMessageDialog(this, """
-                        amade-mail — Mailer for amadeOS
-                        A CDE-style IMAP/SMTP mail client.
-
-                        Licensed under the EUPL-1.2.
-                        https://github.com/datazuul/amade-mail""",
-                "About Mailer", JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getIconImage()));
+        JOptionPane.showMessageDialog(this, tr("about.text") + "\nhttps://github.com/datazuul/amade-mail",
+                tr("menu.help.about"), JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getIconImage()));
     }
 }

@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.ui.main;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 import org.datazuul.amadeos.mail.domain.MailFolder;
 import org.datazuul.amadeos.mail.ui.options.OptionsDialog;
 
@@ -15,40 +17,40 @@ import java.util.function.Consumer;
  * The dtmail menu bar: Mailbox, Message, Edit, Attachments, View, Compose, Move and Help.
  */
 final class MainMenuBar extends JMenuBar {
-    private final JRadioButtonMenuItem plainView = new JRadioButtonMenuItem("Plain Text");
-    private final JRadioButtonMenuItem htmlView = new JRadioButtonMenuItem("HTML");
+    private final JRadioButtonMenuItem plainView = new JRadioButtonMenuItem(tr("menu.view.plain"));
+    private final JRadioButtonMenuItem htmlView = new JRadioButtonMenuItem(tr("menu.view.html"));
 
     MainMenuBar(MainPresenter presenter, MainWindow window) {
         int ctrl = InputEvent.CTRL_DOWN_MASK;
         int ctrlShift = InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK;
 
-        JMenu mailbox = menu("Mailbox", KeyEvent.VK_M);
-        mailbox.add(item("Check for New Mail", KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), presenter::checkMail));
+        JMenu mailbox = menu("menu.mailbox");
+        mailbox.add(item(tr("menu.mailbox.check"), KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0), presenter::checkMail));
         mailbox.addSeparator();
-        mailbox.add(item("Mail Options…", null, () -> presenter.openOptions(OptionsDialog.ACCOUNTS, false)));
+        mailbox.add(item(tr("menu.mailbox.options"), null, () -> presenter.openOptions(OptionsDialog.ACCOUNTS, false)));
         mailbox.addSeparator();
-        mailbox.add(item("Close", KeyStroke.getKeyStroke(KeyEvent.VK_Q, ctrl), presenter::exit));
+        mailbox.add(item(tr("menu.mailbox.close"), KeyStroke.getKeyStroke(KeyEvent.VK_Q, ctrl), presenter::exit));
         add(mailbox);
 
-        JMenu message = menu("Message", KeyEvent.VK_E);
-        message.add(item("Mark as Unread", KeyStroke.getKeyStroke(KeyEvent.VK_U, ctrl), presenter::markUnread));
-        message.add(item("Delete", KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), presenter::deleteSelected));
+        JMenu message = menu("menu.message");
+        message.add(item(tr("menu.message.unread"), KeyStroke.getKeyStroke(KeyEvent.VK_U, ctrl), presenter::markUnread));
+        message.add(item(tr("menu.message.delete"), KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), presenter::deleteSelected));
         message.addSeparator();
-        message.add(item("Show Source", KeyStroke.getKeyStroke(KeyEvent.VK_U, ctrlShift), presenter::showSource));
+        message.add(item(tr("menu.message.source"), KeyStroke.getKeyStroke(KeyEvent.VK_U, ctrlShift), presenter::showSource));
         add(message);
 
-        JMenu edit = menu("Edit", KeyEvent.VK_D);
-        edit.add(item("Copy", KeyStroke.getKeyStroke(KeyEvent.VK_C, ctrl), window::copySelection));
-        edit.add(item("Select All", KeyStroke.getKeyStroke(KeyEvent.VK_A, ctrl), window::selectAllMessages));
+        JMenu edit = menu("menu.edit");
+        edit.add(item(tr("menu.edit.copy"), KeyStroke.getKeyStroke(KeyEvent.VK_C, ctrl), window::copySelection));
+        edit.add(item(tr("menu.edit.select-all"), KeyStroke.getKeyStroke(KeyEvent.VK_A, ctrl), window::selectAllMessages));
         add(edit);
 
-        JMenu attachments = menu("Attachments", KeyEvent.VK_A);
-        attachments.add(item("Save All…", null, window::saveAllAttachments));
+        JMenu attachments = menu("menu.attachments");
+        attachments.add(item(tr("menu.attachments.save-all"), null, window::saveAllAttachments));
         add(attachments);
 
-        JMenu view = menu("View", KeyEvent.VK_V);
-        view.add(item("Next", KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.ALT_DOWN_MASK), presenter::next));
-        view.add(item("Previous", KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.ALT_DOWN_MASK), presenter::previous));
+        JMenu view = menu("menu.view");
+        view.add(item(tr("menu.view.next"), KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, InputEvent.ALT_DOWN_MASK), presenter::next));
+        view.add(item(tr("menu.view.previous"), KeyStroke.getKeyStroke(KeyEvent.VK_UP, InputEvent.ALT_DOWN_MASK), presenter::previous));
         view.addSeparator();
         ButtonGroup format = new ButtonGroup();
         format.add(plainView);
@@ -58,20 +60,20 @@ final class MainMenuBar extends JMenuBar {
         view.add(plainView);
         view.add(htmlView);
         view.addSeparator();
-        JCheckBoxMenuItem folders = new JCheckBoxMenuItem("Show Folders", true);
+        JCheckBoxMenuItem folders = new JCheckBoxMenuItem(tr("menu.view.folders"), true);
         folders.addActionListener(e -> window.setFoldersVisible(folders.isSelected()));
         view.add(folders);
         add(view);
 
-        JMenu compose = menu("Compose", KeyEvent.VK_C);
-        compose.add(item("New Message", KeyStroke.getKeyStroke(KeyEvent.VK_N, ctrl), presenter::composeNew));
+        JMenu compose = menu("menu.compose");
+        compose.add(item(tr("menu.compose.new"), KeyStroke.getKeyStroke(KeyEvent.VK_N, ctrl), presenter::composeNew));
         compose.addSeparator();
-        compose.add(item("Reply to Sender", KeyStroke.getKeyStroke(KeyEvent.VK_R, ctrl), () -> presenter.reply(false)));
-        compose.add(item("Reply to All", KeyStroke.getKeyStroke(KeyEvent.VK_R, ctrlShift), () -> presenter.reply(true)));
-        compose.add(item("Forward", KeyStroke.getKeyStroke(KeyEvent.VK_L, ctrl), presenter::forward));
+        compose.add(item(tr("menu.compose.reply"), KeyStroke.getKeyStroke(KeyEvent.VK_R, ctrl), () -> presenter.reply(false)));
+        compose.add(item(tr("menu.compose.reply-all"), KeyStroke.getKeyStroke(KeyEvent.VK_R, ctrlShift), () -> presenter.reply(true)));
+        compose.add(item(tr("menu.compose.forward"), KeyStroke.getKeyStroke(KeyEvent.VK_L, ctrl), presenter::forward));
         add(compose);
 
-        JMenu move = menu("Move", KeyEvent.VK_O);
+        JMenu move = menu("menu.move");
         move.addMenuListener(new MenuListener() {
             @Override
             public void menuSelected(MenuEvent e) {
@@ -89,8 +91,8 @@ final class MainMenuBar extends JMenuBar {
         add(move);
 
         add(Box.createHorizontalGlue());
-        JMenu help = menu("Help", KeyEvent.VK_H);
-        help.add(item("About Mailer", null, window::showAbout));
+        JMenu help = menu("menu.help");
+        help.add(item(tr("menu.help.about"), null, window::showAbout));
         add(help);
     }
 
@@ -101,7 +103,7 @@ final class MainMenuBar extends JMenuBar {
     private static void fillMove(JMenu move, List<MailFolder> targets, Consumer<MailFolder> action) {
         move.removeAll();
         if (targets.isEmpty()) {
-            JMenuItem none = new JMenuItem("(select a message first)");
+            JMenuItem none = new JMenuItem(tr("menu.move.none"));
             none.setEnabled(false);
             move.add(none);
             return;
@@ -111,10 +113,9 @@ final class MainMenuBar extends JMenuBar {
         }
     }
 
-    private static JMenu menu(String text, int mnemonic) {
-        JMenu menu = new JMenu(text);
-        menu.setMnemonic(mnemonic);
-        return menu;
+    /** A menu titled with {@code key}; {@code &} in the text marks the mnemonic letter. */
+    private static JMenu menu(String key) {
+        return org.datazuul.amadeos.commons.i18n.Mnemonics.apply(new JMenu(), tr(key));
     }
 
     private static JMenuItem item(String text, KeyStroke accelerator, Runnable action) {

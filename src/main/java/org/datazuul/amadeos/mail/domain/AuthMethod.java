@@ -1,5 +1,7 @@
 package org.datazuul.amadeos.mail.domain;
 
+import static org.datazuul.amadeos.mail.i18n.Texts.tr;
+
 /**
  * How the mailer logs in to the IMAP and SMTP servers of an account.
  */
@@ -26,8 +28,10 @@ public enum AuthMethod {
         return provider != null;
     }
 
+    /** Shown in the account settings, from {@code auth.<method>}; {@link #label} is the English fallback. */
     @Override
     public String toString() {
-        return label;
+        String key = "auth." + name().toLowerCase(java.util.Locale.ROOT);
+        return org.datazuul.amadeos.mail.i18n.Texts.messages().has(key) ? tr(key) : label;
     }
 }
