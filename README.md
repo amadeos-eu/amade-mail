@@ -5,7 +5,7 @@ IMAP/SMTP mail client in Java Swing, modelled on the CDE Mailer (`dtmail`) and e
 mail client needs today: a folder column for IMAP, several accounts and safe display of HTML mail.
 
 ![License](https://img.shields.io/badge/license-EUPL--1.2-blue)
-![Java](https://img.shields.io/badge/Java-21-orange)
+![Java](https://img.shields.io/badge/Java-25-orange)
 ![Debian](https://img.shields.io/badge/Debian-package-red)
 
 > Status: early development (0.1.0). Reading, deleting, moving and sending work; see *Roadmap*.
@@ -131,7 +131,7 @@ a test checks that every translation is complete and that menu mnemonics stay un
 
 ## Architecture
 
-Java 21, Swing, Guice; same structure as [amade-pad](https://github.com/datazuul/amade-pad). Theme, Motif
+Java 25, Swing, Guice; same structure as [amade-pad](https://github.com/datazuul/amade-pad). Theme, Motif
 look, start-up, keyring and XDG helpers come from
 [amade-commons](https://github.com/datazuul/amade-commons), so the Mailer follows the desktop theme
 chosen in the Style Manager immediately, including *Dark Slate*.
@@ -151,7 +151,7 @@ the user selected something else are dropped.
 
 ## Building and testing
 
-Requirements: Java 21 JDK; `dpkg-deb` for the Debian package.
+Requirements: Java 25 JDK; `dpkg-deb` for the Debian package.
 
 `amade-commons` is taken from JitPack. If it is checked out next to this repository
 (`../amade-commons`), Gradle builds that checkout instead, so changes to both can be tested together.
