@@ -26,7 +26,7 @@ repositories {
 dependencies {
     // Theme, Motif look, start-up, keyring and XDG helpers shared by all amadeOS applications.
     // With ../amade-commons checked out, settings.gradle builds that checkout instead (composite build).
-    implementation 'com.github.datazuul:amade-commons:327fe95f3e'
+    implementation 'com.github.datazuul:amade-commons:391b2c9900'
 
     // Mail: Jakarta Mail API with the Eclipse Angus implementation (IMAP, SMTP, MIME).
     implementation 'jakarta.mail:jakarta.mail-api:2.1.3'
@@ -58,7 +58,9 @@ jar {
         attributes(
             'Main-Class': mainClassName,
             'Implementation-Title': 'amade-mail',
-            'Implementation-Version': project.version
+            'Implementation-Version': project.version,
+            // LaunchFeedback (amade-commons) talks to the X server through the foreign function API.
+            'Enable-Native-Access': 'ALL-UNNAMED'
         )
     }
     from {
