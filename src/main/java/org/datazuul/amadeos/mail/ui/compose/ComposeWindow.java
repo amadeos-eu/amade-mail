@@ -125,6 +125,31 @@ public final class ComposeWindow extends JFrame {
         content.add(bodyScroll, BorderLayout.CENTER);
         content.add(south, BorderLayout.SOUTH);
         setContentPane(content);
+        // Files dropped anywhere on the window become attachments, e.g. the Drag Appt icon of the Calendar.
+        TransferHandler drop = new TransferHandler() {
+            @Override
+            public boolean canImport(TransferSupport support) {
+                return support.isDataFlavorSupported(java.awt.datatransfer.DataFlavor.javaFileListFlavor);
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public boolean importData(TransferSupport support) {
+                try {
+                    List<File> files = (List<File>) support.getTransferable()
+                            .getTransferData(java.awt.datatransfer.DataFlavor.javaFileListFlavor);
+                    for (File f : files) if (f.isFile()) attachments.addElement(f.toPath());
+                    attachmentScroll.setVisible(!attachments.isEmpty());
+                    revalidate();
+                    return true;
+                } catch (java.awt.datatransfer.UnsupportedFlavorException | java.io.IOException e) {
+                    return false;
+                }
+            }
+        };
+        content.setTransferHandler(drop);
+        body.setTransferHandler(drop);
+        attachmentList.setTransferHandler(drop);
         setJMenuBar(menuBar());
         pack();
         setLocationByPlatform(true);

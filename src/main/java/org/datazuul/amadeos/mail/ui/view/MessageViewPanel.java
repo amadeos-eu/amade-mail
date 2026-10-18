@@ -3,6 +3,7 @@ package org.datazuul.amadeos.mail.ui.view;
 import static org.datazuul.amadeos.mail.i18n.Texts.tr;
 
 import org.datazuul.amadeos.mail.domain.MessageContent;
+import org.datazuul.amadeos.mail.service.CalendarContent;
 import org.datazuul.amadeos.mail.domain.MessageContent.Attachment;
 import org.datazuul.amadeos.mail.ui.messages.MessageTableModel;
 import org.datazuul.amadeos.commons.swing.AmadeUI;
@@ -28,6 +29,7 @@ public final class MessageViewPanel extends JPanel {
     private final MessageViewActions actions;
     private final JPanel headers = new JPanel(new GridBagLayout());
     private final JPanel remoteBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
+    private final JPanel calendarBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 2));
     private final JLabel remoteLabel = new JLabel();
     private final CardLayout cards = new CardLayout();
     private final JPanel body = new JPanel(cards);
@@ -53,10 +55,23 @@ public final class MessageViewPanel extends JPanel {
         remoteBar.add(always);
         remoteBar.setVisible(false);
 
+        // A dtcm appointment text or an .ics attachment: one click schedules it, as a drop on the CDE
+        // Calendar did.
+        AmadeUI.style(calendarBar, (panel, theme) -> panel.setBackground(theme.softHighlight()));
+        calendarBar.add(new JLabel(tr("calendar.contains")));
+        JButton schedule = new JButton(tr("calendar.schedule"));
+        schedule.addActionListener(e -> actions.scheduleInCalendar());
+        calendarBar.add(schedule);
+        calendarBar.setVisible(false);
+        JPanel bars = new JPanel(new GridLayout(0, 1));
+        bars.setOpaque(false);
+        bars.add(remoteBar);
+        bars.add(calendarBar);
+
         JPanel top = new JPanel(new BorderLayout());
         top.setBorder(AmadeUI.sunken());
         top.add(headers, BorderLayout.CENTER);
-        top.add(remoteBar, BorderLayout.SOUTH);
+        top.add(bars, BorderLayout.SOUTH);
 
         text.setEditable(false);
         text.setLineWrap(true);
@@ -93,6 +108,7 @@ public final class MessageViewPanel extends JPanel {
         headers.revalidate();
         headers.repaint();
         remoteBar.setVisible(false);
+        calendarBar.setVisible(false);
         attachmentBar.setVisible(false);
         text.setText(message);
         cards.show(body, "text");
@@ -115,6 +131,7 @@ public final class MessageViewPanel extends JPanel {
                 ? tr("view.blocked", message.html().blockedRemote())
                 : "");
         remoteBar.setVisible(blocked);
+        calendarBar.setVisible(CalendarContent.hasAppointment(c, message.plainText()));
 
         if (message.showsHtml()) {
             try {
