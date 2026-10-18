@@ -130,7 +130,7 @@ The Mailer speaks English, Deutsch, Français, Español and Italiano. It follows
 amadeOS desktop; *Mailbox → Mail Options… → Language* sets an own language for the Mailer alone (from
 the next start). Outside amadeOS it uses `LANG`. Dates in the message list and header, the reply
 attribution ("On … wrote:") and the forward header are written the way the chosen language writes
-them. The texts live in `src/main/resources/org/datazuul/amadeos/mail/messages*.properties` (UTF-8);
+them. The texts live in `src/main/resources/eu/amadeos/apps/mail/messages*.properties` (UTF-8);
 a test checks that every translation is complete and that menu mnemonics stay unique.
 
 ## Architecture
