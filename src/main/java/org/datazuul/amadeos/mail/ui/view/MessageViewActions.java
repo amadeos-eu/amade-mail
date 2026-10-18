@@ -15,4 +15,7 @@ public interface MessageViewActions {
     void openAttachment(Attachment attachment);
 
     void saveAttachment(Attachment attachment);
+
+    /** The message carries an appointment: hand it to the Calendar. */
+    void scheduleInCalendar();
 }

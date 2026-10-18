@@ -50,7 +50,8 @@ class MainPresenterTest {
     private final MailFolder trash = folder("Trash", FolderRole.TRASH, 0);
     private final MainPresenter presenter = new MainPresenter(view, gateway, accountRepository, preferencesRepository,
             mock(PasswordStore.class), mock(CredentialProvider.class), new HtmlSanitizer(), remoteImages,
-            mock(DesktopLauncher.class), new DirectExecutorService(), new EdtExecutor());
+            mock(DesktopLauncher.class), new DirectExecutorService(), new EdtExecutor(),
+            mock(org.datazuul.amadeos.mail.service.CalendarHandoff.class));
 
     private static MailFolder folder(String name, FolderRole role, int unread) {
         return new MailFolder("a1", name, name, '/', role, true, unread, 10);

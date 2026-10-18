@@ -84,6 +84,11 @@ public final class MainWindow extends JFrame implements MainView {
             public void saveAttachment(Attachment attachment) {
                 presenter.saveAttachment(attachment);
             }
+
+            @Override
+            public void scheduleInCalendar() {
+                presenter.scheduleInCalendar();
+            }
         });
 
         JSplitPane vertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT, list, messageView);

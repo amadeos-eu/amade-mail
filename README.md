@@ -42,6 +42,10 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
   In *All inboxes* a coloured dot shows the account.
 - **Message view**: plain text or HTML (*View → Plain Text / HTML*), attachment bar with
   *Open* and *Save As…*, *Message → Show Source*.
+- **Appointments in mail**: a message with the dtcm `** Calendar Appointment **` text or an `.ics`
+  attachment shows a bar with *Schedule in Calendar*, which hands it to
+  [amade-calendar](https://github.com/datazuul/amade-calendar); files dropped on a compose window
+  become attachments, so the Calendar's *Drag Appt* icon works as it did with the CDE Mailer.
 - **Move menu** lists the folders of the selected message's account, as in dtmail.
 - **Mail Options** (*Mailbox → Mail Options…*) is one dialog with a *Category* menu:
   - *Accounts*: list with Add / Remove / Move up / Move down; name, sender, IMAP and SMTP server
@@ -177,6 +181,7 @@ so the amadeOS front panel lists it in the Mail drawer.
 - [ ] Drafts, templates, aliases / several identities per account, vacation message
 - [ ] Search; threading; printing
 - [x] OAuth2 for Gmail
+- [x] Appointments: *Schedule in Calendar* for dtcm text and `.ics` attachments, file drops on compose
 - [ ] OAuth2 for Microsoft 365
 - [ ] Offline cache of headers and messages
 

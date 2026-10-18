@@ -14,6 +14,8 @@ import org.datazuul.amadeos.mail.domain.OutgoingMessage;
 import org.datazuul.amadeos.mail.repository.AccountRepository;
 import org.datazuul.amadeos.commons.desktop.PasswordStore;
 import org.datazuul.amadeos.mail.repository.PreferencesRepository;
+import org.datazuul.amadeos.mail.service.CalendarContent;
+import org.datazuul.amadeos.mail.service.CalendarHandoff;
 import org.datazuul.amadeos.mail.service.CredentialProvider;
 import org.datazuul.amadeos.mail.service.HtmlSanitizer;
 import org.datazuul.amadeos.mail.service.HtmlSanitizer.SanitizedHtml;
@@ -74,6 +76,7 @@ public final class MainPresenter implements MessageViewActions {
     private final HtmlSanitizer sanitizer;
     private final RemoteImageLoader remoteImages;
     private final DesktopLauncher desktop;
+    private final CalendarHandoff calendar;
     private final ExecutorService executor;
     private final Executor edt;
 
@@ -94,8 +97,9 @@ public final class MainPresenter implements MessageViewActions {
                          PreferencesRepository preferencesRepository, PasswordStore passwordStore,
                          CredentialProvider credentials, HtmlSanitizer sanitizer, RemoteImageLoader remoteImages,
                          DesktopLauncher desktop, ExecutorService executor,
-                         org.datazuul.amadeos.commons.swing.EdtExecutor edt) {
+                         org.datazuul.amadeos.commons.swing.EdtExecutor edt, CalendarHandoff calendar) {
         this.view = view;
+        this.calendar = calendar;
         this.gateway = gateway;
         this.accountRepository = accountRepository;
         this.preferencesRepository = preferencesRepository;
@@ -465,6 +469,24 @@ public final class MainPresenter implements MessageViewActions {
             }
             return file;
         }, file -> view.setStatus(tr("attachment.opened", file.getFileName().toString())), view::showError);
+    }
+
+    /** "Schedule in Calendar": the .ics attachment, else the message text, goes to amade-calendar as a file. */
+    @Override
+    public void scheduleInCalendar() {
+        if (displayed == null) return;
+        Attachment payload = CalendarContent.icsAttachment(displayed.content()).orElseGet(() ->
+                new Attachment("appointment.txt", "text/plain",
+                        displayed.plainText().getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+        async(() -> {
+            Path file = writeTemporary(payload);
+            try {
+                calendar.schedule(file);
+            } catch (IOException e) {
+                throw new MailServiceException(tr("calendar.error", e.getMessage()), e);
+            }
+            return file;
+        }, file -> view.setStatus(tr("calendar.scheduled")), view::showError);
     }
 
     private synchronized Path writeTemporary(Attachment attachment) {
