@@ -386,6 +386,7 @@ public final class MainPresenter implements MessageViewActions {
     }
     // --8<-- [end:message-selected]
 
+    // --8<-- [start:prepare]
     /** Runs in the background: sanitises the HTML and downloads remote images if allowed. */
     DisplayedMessage prepare(MessageSummary summary, MessageContent content, boolean preferHtml, boolean forceRemote) {
         String text = content.hasPlainText() ? content.plainText()
@@ -399,6 +400,7 @@ public final class MainPresenter implements MessageViewActions {
         if (allowRemote) resources.putAll(remoteImages.load(RemoteImageLoader.imageUrls(sanitized.document())));
         return new DisplayedMessage(summary, content, text, sanitized, resources);
     }
+    // --8<-- [end:prepare]
 
     public void setShowHtml(boolean html) {
         showHtml = html;
