@@ -61,6 +61,7 @@ public final class FileAccountRepository implements AccountRepository {
         return accounts;
     }
 
+    // --8<-- [start:save]
     @Override
     public synchronized void save(List<Account> accounts) {
         Properties p = new Properties();
@@ -72,6 +73,7 @@ public final class FileAccountRepository implements AccountRepository {
         p.setProperty("accounts", String.join(",", ids));
         PropertiesFile.store(file, p, "amade-mail accounts (passwords are kept in the keyring)");
     }
+    // --8<-- [end:save]
 
     private static Account read(Properties p, String id, int index) {
         String prefix = "account." + id + ".";

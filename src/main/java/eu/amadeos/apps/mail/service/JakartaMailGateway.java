@@ -83,6 +83,7 @@ public final class JakartaMailGateway implements MailGateway {
         AuthMethod auth;
     }
 
+    // --8<-- [start:with-store]
     private <T> T withStore(Account account, StoreAction<T> action) {
         Connection connection = connections.computeIfAbsent(account.id(), id -> new Connection());
         connection.lock.lock();
@@ -107,6 +108,7 @@ public final class JakartaMailGateway implements MailGateway {
             connection.lock.unlock();
         }
     }
+    // --8<-- [end:with-store]
 
     private Store connect(Connection connection, Account account) throws MessagingException {
         if (connection.store != null && connection.store.isConnected()

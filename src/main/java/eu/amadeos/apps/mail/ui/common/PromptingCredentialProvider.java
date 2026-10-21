@@ -60,6 +60,7 @@ public final class PromptingCredentialProvider implements CredentialProvider {
         this.desktop = desktop;
     }
 
+    // --8<-- [start:password]
     @Override
     public synchronized String password(Account account) {
         if (account.auth().isOAuth2()) return accessToken(account);
@@ -76,6 +77,7 @@ public final class PromptingCredentialProvider implements CredentialProvider {
         if (prompt.remember()) store.store(account.id(), "amade-mail " + account.email(), prompt.password());
         return prompt.password();
     }
+    // --8<-- [end:password]
 
     @Override
     public void rejected(Account account) {
@@ -242,6 +244,7 @@ public final class PromptingCredentialProvider implements CredentialProvider {
         });
     }
 
+    // --8<-- [start:on-edt]
     /** Runs a dialog on the EDT and waits for its result; null if interrupted. */
     private static <T> T onEdt(Supplier<T> dialog) {
         if (SwingUtilities.isEventDispatchThread()) return dialog.get();
@@ -256,4 +259,5 @@ public final class PromptingCredentialProvider implements CredentialProvider {
         }
         return result.get();
     }
+    // --8<-- [end:on-edt]
 }

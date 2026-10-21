@@ -118,6 +118,7 @@ public final class OAuth2Service {
         return Optional.of(accept(account, answer));
     }
 
+    // --8<-- [start:sign-in]
     /**
      * Lets the user sign in in the web browser and waits for the redirect. Blocks up to
      * {@link #SIGN_IN_TIMEOUT}; must not run on the EDT.
@@ -170,6 +171,7 @@ public final class OAuth2Service {
             server.stop(0);
         }
     }
+    // --8<-- [end:sign-in]
 
     /** The server rejected the access token: the next connection renews it. */
     public void invalidate(String accountId) {
@@ -205,6 +207,7 @@ public final class OAuth2Service {
         return URI.create(provider.authorizationUri() + "?" + formEncode(query));
     }
 
+    // --8<-- [start:challenge]
     static String challenge(String verifier) {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(verifier.getBytes(StandardCharsets.US_ASCII));
@@ -213,6 +216,7 @@ public final class OAuth2Service {
             throw new IllegalStateException("SHA-256 not available", e);
         }
     }
+    // --8<-- [end:challenge]
 
     private String randomToken(int bytes) {
         byte[] data = new byte[bytes];

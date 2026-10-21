@@ -358,6 +358,7 @@ public final class MainPresenter implements MessageViewActions {
 
     // ---- message view ---------------------------------------------------------------------------
 
+    // --8<-- [start:message-selected]
     public void messageSelected(MessageSummary message) {
         int generation = ++messageGeneration;
         displayed = null;
@@ -383,6 +384,7 @@ public final class MainPresenter implements MessageViewActions {
             if (generation == messageGeneration) view.clearMessage(error);
         });
     }
+    // --8<-- [end:message-selected]
 
     /** Runs in the background: sanitises the HTML and downloads remote images if allowed. */
     DisplayedMessage prepare(MessageSummary summary, MessageContent content, boolean preferHtml, boolean forceRemote) {
@@ -454,6 +456,7 @@ public final class MainPresenter implements MessageViewActions {
         }
     }
 
+    // --8<-- [start:open-attachment]
     @Override
     public void openAttachment(Attachment attachment) {
         if (DesktopLauncher.isRisky(attachment.fileName())) {
@@ -470,6 +473,7 @@ public final class MainPresenter implements MessageViewActions {
             return file;
         }, file -> view.setStatus(tr("attachment.opened", file.getFileName().toString())), view::showError);
     }
+    // --8<-- [end:open-attachment]
 
     /** "Schedule in Calendar": the .ics attachment, else the message text, goes to amade-calendar as a file. */
     @Override

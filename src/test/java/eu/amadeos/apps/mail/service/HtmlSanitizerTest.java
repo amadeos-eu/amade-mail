@@ -33,6 +33,7 @@ class HtmlSanitizerTest {
         assertTrue(out.contains("href=\"https://example.org/\""), out);
     }
 
+    // --8<-- [start:blocks-remote]
     @Test
     void blocksRemoteImagesAndKeepsEmbeddedOnes() {
         SanitizedHtml html = sanitizer.sanitize("""
@@ -49,6 +50,7 @@ class HtmlSanitizerTest {
         assertTrue(out.contains("src=\"cid:logo@example\""), out);
         assertTrue(out.contains("color: red"), out);
     }
+    // --8<-- [end:blocks-remote]
 
     @Test
     void keepsRemoteImagesWhenAllowed() {

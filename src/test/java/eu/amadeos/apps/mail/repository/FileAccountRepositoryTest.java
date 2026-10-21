@@ -39,6 +39,7 @@ class FileAccountRepositoryTest {
         assertEquals(accounts, repository.load());
     }
 
+    // --8<-- [start:never-writes]
     @Test
     void neverWritesPasswords() throws IOException {
         Path file = dir.resolve("accounts.conf");
@@ -49,6 +50,7 @@ class FileAccountRepositoryTest {
             assertFalse(line.toLowerCase().contains("password"), line);
         }
     }
+    // --8<-- [end:never-writes]
 
     @Test
     void toleratesBrokenValues() throws IOException {

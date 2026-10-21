@@ -34,6 +34,7 @@ public final class HtmlSanitizer {
             .addAttributes("font", "color", "face", "size")
             .addProtocols("img", "src", "cid", "data", "http", "https");
 
+    // --8<-- [start:sanitize]
     /**
      * @param html        the text/html body of a message
      * @param allowRemote true to keep references to remote images
@@ -84,6 +85,7 @@ public final class HtmlSanitizer {
         clean.outputSettings().syntax(Document.OutputSettings.Syntax.xml).prettyPrint(false);
         return new SanitizedHtml(clean, blocked);
     }
+    // --8<-- [end:sanitize]
 
     /** Plain text rendering of an HTML body, used to quote HTML-only messages in replies. */
     public String toPlainText(String html) {
