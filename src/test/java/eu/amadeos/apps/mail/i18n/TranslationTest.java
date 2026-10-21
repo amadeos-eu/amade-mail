@@ -1,6 +1,8 @@
 package eu.amadeos.apps.mail.i18n;
 
+import eu.amadeos.apps.mail.bootstrap.AmadeMailApplication;
 import eu.amadeos.commons.i18n.Messages;
+import eu.amadeos.commons.i18n.Texts;
 import eu.amadeos.commons.i18n.TranslationCheck;
 import org.junit.jupiter.api.Test;
 
@@ -14,12 +16,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TranslationTest {
     private static Messages in(Locale locale) {
-        return Messages.load(Texts.class, Texts.BUNDLE, locale);
+        return Messages.load(AmadeMailApplication.class, Texts.bundle(), locale);
     }
 
     @Test
     void everyLanguageHasEveryText() {
-        assertEquals(Map.of(), TranslationCheck.problems(Texts.class, Texts.BUNDLE));
+        assertEquals(Map.of(), TranslationCheck.problems(AmadeMailApplication.class, Texts.bundle()));
     }
 
     @Test

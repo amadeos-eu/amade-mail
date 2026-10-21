@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.domain;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 /**
  * How a connection to an IMAP or SMTP server is protected.

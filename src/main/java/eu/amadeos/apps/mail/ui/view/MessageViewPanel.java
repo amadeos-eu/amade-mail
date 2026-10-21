@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.ui.view;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import eu.amadeos.apps.mail.domain.MessageContent;
 import eu.amadeos.apps.mail.service.CalendarContent;
@@ -22,7 +22,7 @@ import java.util.Locale;
 public final class MessageViewPanel extends JPanel {
     /** The date in the header, e.g. "Tue, 13 Oct 2026 08:12", written the way the language writes it. */
     private static DateTimeFormatter dateFormat() {
-        return DateTimeFormatter.ofPattern(tr("date.full"), eu.amadeos.apps.mail.i18n.Texts.messages().locale())
+        return DateTimeFormatter.ofPattern(tr("date.full"), eu.amadeos.commons.i18n.Texts.messages().locale())
                 .withZone(ZoneId.systemDefault());
     }
 

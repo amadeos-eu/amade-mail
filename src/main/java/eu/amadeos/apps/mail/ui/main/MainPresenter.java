@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.ui.main;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import com.google.inject.Inject;
 import eu.amadeos.apps.mail.domain.Account;

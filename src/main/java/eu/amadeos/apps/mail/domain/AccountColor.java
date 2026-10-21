@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.domain;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import java.awt.Color;
 
@@ -38,6 +38,6 @@ public enum AccountColor {
     @Override
     public String toString() {
         String key = "color." + name().toLowerCase(java.util.Locale.ROOT);
-        return eu.amadeos.apps.mail.i18n.Texts.messages().has(key) ? tr(key) : label;
+        return eu.amadeos.commons.i18n.Texts.messages().has(key) ? tr(key) : label;
     }
 }

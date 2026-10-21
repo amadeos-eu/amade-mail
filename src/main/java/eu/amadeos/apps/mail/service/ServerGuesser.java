@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.service;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import eu.amadeos.apps.mail.domain.AuthMethod;
 import eu.amadeos.apps.mail.domain.ConnectionSecurity;
