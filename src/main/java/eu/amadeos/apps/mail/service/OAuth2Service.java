@@ -269,6 +269,7 @@ public final class OAuth2Service {
                 error + (description != null ? " (" + description + ")" : "")) + fix, null, true);
     }
 
+    // --8<-- [start:redirect]
     private static void handleRedirect(HttpExchange exchange, String state, CompletableFuture<Map<String, String>> callback)
             throws IOException {
         Map<String, String> params = parseQuery(exchange.getRequestURI().getRawQuery());
@@ -287,6 +288,7 @@ public final class OAuth2Service {
         }
         if (ours) callback.complete(params);
     }
+    // --8<-- [end:redirect]
 
     static Map<String, String> parseQuery(String rawQuery) {
         Map<String, String> params = new LinkedHashMap<>();
