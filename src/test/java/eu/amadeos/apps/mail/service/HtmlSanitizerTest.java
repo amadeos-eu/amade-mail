@@ -53,6 +53,16 @@ class HtmlSanitizerTest {
     // --8<-- [end:blocks-remote]
 
     @Test
+    void blockedImagesBecomeTheirAltTextOrDisappear() {
+        String out = body(sanitizer.sanitize("""
+                <img src="https://tracker.example/pixel.gif" width="1" height="1">
+                <img src="http://cdn.example/logo.png" alt="Logo" width="400" height="80">
+                """, false));
+        assertFalse(out.contains("<img"), out);
+        assertTrue(out.contains("<span class=\"blocked-image\">Logo</span>"), out);
+    }
+
+    @Test
     void keepsRemoteImagesWhenAllowed() {
         SanitizedHtml html = sanitizer.sanitize("<img src=\"https://cdn.example/logo.png\">", true);
         assertEquals(0, html.blockedRemote());
