@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.ui.options;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import eu.amadeos.apps.mail.domain.Account;
 import eu.amadeos.apps.mail.domain.MailPreferences;
@@ -8,7 +8,7 @@ import eu.amadeos.commons.i18n.LanguageChooser;
 import eu.amadeos.commons.i18n.LocaleSettings;
 import eu.amadeos.commons.i18n.Messages;
 import eu.amadeos.commons.swing.AmadeUI;
-import eu.amadeos.apps.mail.i18n.Texts;
+import eu.amadeos.commons.i18n.Texts;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,8 +1,8 @@
 package eu.amadeos.apps.mail.ui.messages;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
-import eu.amadeos.apps.mail.i18n.Texts;
+import eu.amadeos.commons.i18n.Texts;
 
 import eu.amadeos.apps.mail.domain.MessageSummary;
 

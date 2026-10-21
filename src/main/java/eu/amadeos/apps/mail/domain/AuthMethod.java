@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.domain;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 /**
  * How the mailer logs in to the IMAP and SMTP servers of an account.
@@ -32,6 +32,6 @@ public enum AuthMethod {
     @Override
     public String toString() {
         String key = "auth." + name().toLowerCase(java.util.Locale.ROOT);
-        return eu.amadeos.apps.mail.i18n.Texts.messages().has(key) ? tr(key) : label;
+        return eu.amadeos.commons.i18n.Texts.messages().has(key) ? tr(key) : label;
     }
 }

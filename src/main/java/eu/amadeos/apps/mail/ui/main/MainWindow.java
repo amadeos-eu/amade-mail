@@ -2,7 +2,7 @@ package eu.amadeos.apps.mail.ui.main;
 
 import com.google.inject.Inject;
 import eu.amadeos.commons.i18n.LocaleSettings;
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import eu.amadeos.apps.mail.domain.Account;
 import eu.amadeos.apps.mail.domain.MailPreferences;

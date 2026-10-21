@@ -33,6 +33,7 @@ class HtmlSanitizerTest {
         assertTrue(out.contains("href=\"https://example.org/\""), out);
     }
 
+    // --8<-- [start:blocks-remote]
     @Test
     void blocksRemoteImagesAndKeepsEmbeddedOnes() {
         SanitizedHtml html = sanitizer.sanitize("""
@@ -48,6 +49,17 @@ class HtmlSanitizerTest {
         assertFalse(out.contains("cdn.example"), out);
         assertTrue(out.contains("src=\"cid:logo@example\""), out);
         assertTrue(out.contains("color: red"), out);
+    }
+    // --8<-- [end:blocks-remote]
+
+    @Test
+    void blockedImagesBecomeTheirAltTextOrDisappear() {
+        String out = body(sanitizer.sanitize("""
+                <img src="https://tracker.example/pixel.gif" width="1" height="1">
+                <img src="http://cdn.example/logo.png" alt="Logo" width="400" height="80">
+                """, false));
+        assertFalse(out.contains("<img"), out);
+        assertTrue(out.contains("<span class=\"blocked-image\">Logo</span>"), out);
     }
 
     @Test

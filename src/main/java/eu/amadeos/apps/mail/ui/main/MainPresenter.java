@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.ui.main;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import com.google.inject.Inject;
 import eu.amadeos.apps.mail.domain.Account;
@@ -358,6 +358,7 @@ public final class MainPresenter implements MessageViewActions {
 
     // ---- message view ---------------------------------------------------------------------------
 
+    // --8<-- [start:message-selected]
     public void messageSelected(MessageSummary message) {
         int generation = ++messageGeneration;
         displayed = null;
@@ -383,7 +384,9 @@ public final class MainPresenter implements MessageViewActions {
             if (generation == messageGeneration) view.clearMessage(error);
         });
     }
+    // --8<-- [end:message-selected]
 
+    // --8<-- [start:prepare]
     /** Runs in the background: sanitises the HTML and downloads remote images if allowed. */
     DisplayedMessage prepare(MessageSummary summary, MessageContent content, boolean preferHtml, boolean forceRemote) {
         String text = content.hasPlainText() ? content.plainText()
@@ -397,6 +400,7 @@ public final class MainPresenter implements MessageViewActions {
         if (allowRemote) resources.putAll(remoteImages.load(RemoteImageLoader.imageUrls(sanitized.document())));
         return new DisplayedMessage(summary, content, text, sanitized, resources);
     }
+    // --8<-- [end:prepare]
 
     public void setShowHtml(boolean html) {
         showHtml = html;
@@ -454,6 +458,7 @@ public final class MainPresenter implements MessageViewActions {
         }
     }
 
+    // --8<-- [start:open-attachment]
     @Override
     public void openAttachment(Attachment attachment) {
         if (DesktopLauncher.isRisky(attachment.fileName())) {
@@ -470,6 +475,7 @@ public final class MainPresenter implements MessageViewActions {
             return file;
         }, file -> view.setStatus(tr("attachment.opened", file.getFileName().toString())), view::showError);
     }
+    // --8<-- [end:open-attachment]
 
     /** "Schedule in Calendar": the .ics attachment, else the message text, goes to amade-calendar as a file. */
     @Override

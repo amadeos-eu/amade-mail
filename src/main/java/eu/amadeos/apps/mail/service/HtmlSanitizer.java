@@ -22,7 +22,8 @@ public final class HtmlSanitizer {
 
     /** Default look of the message view; matches the plain text view. */
     static final String BASE_CSS = "body { font-family: sans-serif; font-size: 13px; background-color: #ffffff; "
-            + "color: #111111; margin: 8px; } img { border: 0; } blockquote { margin-left: 8px; "
+            + "color: #111111; margin: 8px; } img { border: 0; } span.blocked-image { border: 1px dashed #8c827a; "
+            + "color: #6b625b; padding: 0 4px; } blockquote { margin-left: 8px; "
             + "padding-left: 8px; border-left: 2px solid #8c827a; }";
 
     private final Safelist safelist = Safelist.relaxed()
@@ -34,6 +35,7 @@ public final class HtmlSanitizer {
             .addAttributes("font", "color", "face", "size")
             .addProtocols("img", "src", "cid", "data", "http", "https");
 
+    // --8<-- [start:sanitize]
     /**
      * @param html        the text/html body of a message
      * @param allowRemote true to keep references to remote images
@@ -43,7 +45,7 @@ public final class HtmlSanitizer {
         Document clean = new Cleaner(safelist).clean(dirty);
         int blocked = 0;
 
-        for (Element img : clean.select("img[src]")) {
+        for (Element img : clean.select("img")) {
             String src = img.attr("src").strip();
             String lower = src.toLowerCase(Locale.ROOT);
             if (lower.startsWith("data:") && !lower.startsWith("data:image/")) {
@@ -52,6 +54,7 @@ public final class HtmlSanitizer {
                 img.removeAttr("src");
                 blocked++;
             }
+            if (img.attr("src").isBlank()) replaceWithAltText(img);
         }
         for (Element element : clean.select("[style]")) {
             String style = element.attr("style");
@@ -84,6 +87,23 @@ public final class HtmlSanitizer {
         clean.outputSettings().syntax(Document.OutputSettings.Syntax.xml).prettyPrint(false);
         return new SanitizedHtml(clean, blocked);
     }
+    // --8<-- [end:sanitize]
+
+    /**
+     * Flying Saucer paints an image without a source as a black box of the given size, so an image that
+     * lost its source becomes its alternative text in a dashed frame, or disappears when it has none
+     * (tracking pixels never have one).
+     */
+    // --8<-- [start:alt-text]
+    private static void replaceWithAltText(Element img) {
+        String alt = img.attr("alt").strip();
+        if (alt.isEmpty()) {
+            img.remove();
+        } else {
+            img.replaceWith(new Element("span").addClass("blocked-image").text(alt));
+        }
+    }
+    // --8<-- [end:alt-text]
 
     /** Plain text rendering of an HTML body, used to quote HTML-only messages in replies. */
     public String toPlainText(String html) {

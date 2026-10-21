@@ -179,12 +179,14 @@ class OAuth2ServiceTest {
         assertEquals("password", store.lookup("g1").orElseThrow());
     }
 
+    // --8<-- [start:rfc7636]
     @Test
     void challengeFollowsRfc7636() {
         // Example from RFC 7636, appendix B.
         assertEquals("E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM",
                 OAuth2Service.challenge("dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"));
     }
+    // --8<-- [end:rfc7636]
 
     @Test
     void readsJson() {

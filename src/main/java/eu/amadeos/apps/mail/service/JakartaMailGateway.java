@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.service;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import com.google.inject.Inject;
 import jakarta.mail.AuthenticationFailedException;
@@ -83,6 +83,7 @@ public final class JakartaMailGateway implements MailGateway {
         AuthMethod auth;
     }
 
+    // --8<-- [start:with-store]
     private <T> T withStore(Account account, StoreAction<T> action) {
         Connection connection = connections.computeIfAbsent(account.id(), id -> new Connection());
         connection.lock.lock();
@@ -107,6 +108,7 @@ public final class JakartaMailGateway implements MailGateway {
             connection.lock.unlock();
         }
     }
+    // --8<-- [end:with-store]
 
     private Store connect(Connection connection, Account account) throws MessagingException {
         if (connection.store != null && connection.store.isConnected()

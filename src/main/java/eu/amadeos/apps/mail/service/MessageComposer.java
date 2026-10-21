@@ -1,6 +1,6 @@
 package eu.amadeos.apps.mail.service;
 
-import static eu.amadeos.apps.mail.i18n.Texts.tr;
+import static eu.amadeos.commons.i18n.Texts.tr;
 
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -104,7 +104,7 @@ public final class MessageComposer {
     public static String quote(MessageContent original, String plainTextOfOriginal, String signature) {
         StringBuilder body = new StringBuilder("\n\n");
         String date = original.date() == null ? "" : DateTimeFormatter.ofPattern(tr("date.full"),
-                eu.amadeos.apps.mail.i18n.Texts.messages().locale())
+                eu.amadeos.commons.i18n.Texts.messages().locale())
                 .withZone(ZoneId.systemDefault()).format(original.date()) + ", ";
         body.append(tr("compose.quote.attribution", date, original.from())).append('\n');
         for (String line : (plainTextOfOriginal == null ? "" : plainTextOfOriginal).split("\\R", -1)) {
