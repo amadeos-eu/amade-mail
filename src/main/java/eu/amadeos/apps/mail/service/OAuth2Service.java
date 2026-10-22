@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import eu.amadeos.commons.desktop.PasswordStore;
+import eu.amadeos.commons.json.Json;
 import eu.amadeos.apps.mail.domain.Account;
 import eu.amadeos.apps.mail.domain.OAuth2Client;
 import eu.amadeos.apps.mail.domain.OAuth2Provider;

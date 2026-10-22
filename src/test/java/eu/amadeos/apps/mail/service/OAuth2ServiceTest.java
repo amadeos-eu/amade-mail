@@ -1,6 +1,7 @@
 package eu.amadeos.apps.mail.service;
 
 import eu.amadeos.commons.desktop.SessionPasswordStore;
+import eu.amadeos.commons.json.Json;
 import eu.amadeos.apps.mail.domain.Account;
 import eu.amadeos.apps.mail.domain.AccountColor;
 import eu.amadeos.apps.mail.domain.AuthMethod;
