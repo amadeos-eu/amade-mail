@@ -4,6 +4,8 @@ import static eu.amadeos.commons.i18n.Texts.tr;
 
 import eu.amadeos.apps.mail.domain.Account;
 import eu.amadeos.apps.mail.domain.OutgoingMessage;
+import eu.amadeos.commons.contacts.AddressCompletion;
+import eu.amadeos.commons.contacts.ContactDirectory;
 import eu.amadeos.commons.swing.AmadeUI;
 
 import javax.swing.*;
@@ -16,10 +18,12 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The compose window ("New Message" in dtmail): From, To, Cc, optional Bcc, Subject, text and
- * attachments, with Send and Close.
+ * attachments, with Send and Close. To, Cc and Bcc complete addresses from the address books of
+ * amade-contacts.
  */
 public final class ComposeWindow extends JFrame {
 
@@ -44,7 +48,8 @@ public final class ComposeWindow extends JFrame {
     private final String initialBody;
     private final SendHandler handler;
 
-    public ComposeWindow(List<Account> accounts, Draft draft, SendHandler handler) {
+    public ComposeWindow(List<Account> accounts, Draft draft, SendHandler handler, ContactDirectory contacts,
+                         Locale locale) {
         super(tr("app.title.with", draft.subject().isBlank() ? tr("compose.new") : draft.subject()));
         this.handler = handler;
         this.inReplyTo = draft.inReplyTo();
@@ -72,6 +77,9 @@ public final class ComposeWindow extends JFrame {
         });
         for (Account a : accounts) if (a.id().equals(draft.accountId())) from.setSelectedItem(a);
 
+        // --8<-- [start:completion]
+        for (JTextField field : List.of(to, cc, bcc)) AddressCompletion.install(field, contacts, locale);
+        // --8<-- [end:completion]
         to.setText(draft.to());
         cc.setText(draft.cc());
         subject.setText(draft.subject());
