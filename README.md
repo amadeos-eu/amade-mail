@@ -54,6 +54,10 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
   - *Message View*: plain text or HTML by default, remote images, check interval.
 - **Compose window**: From (account with colour), To, Cc, Bcc (*Format → Show Bcc Field*), Subject,
   attachments; *Reply to Sender*, *Reply to All*, *Forward*.
+- **Address completion**: while you type in To, Cc or Bcc, a list offers the matching people and
+  groups from the address books of [amade-contacts](https://github.com/datazuul/amade-contacts)
+  (any word of the name, the nickname or the address; "mull" finds "Müller"). Up and Down choose,
+  Enter or Tab takes one; a group puts in all of its members.
 
 ## Security and privacy
 

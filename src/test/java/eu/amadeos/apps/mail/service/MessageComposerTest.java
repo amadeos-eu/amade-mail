@@ -47,6 +47,17 @@ class MessageComposerTest {
     }
 
     @Test
+    void acceptsWhatTheAddressCompletionLeavesInTheField() throws Exception {
+        // The completion puts "Name <address>, " into the field, so the text ends with a comma.
+        MimeMessage m = composer.build(session, new OutgoingMessage(account(),
+                "Anna Berger <anna@example.org>, \"Keller, Andreas\" <andreas@example.net>, ", "", "", "s", "b",
+                List.of(), ""));
+        assertEquals(2, m.getRecipients(Message.RecipientType.TO).length);
+        assertEquals("Keller, Andreas", ((jakarta.mail.internet.InternetAddress) m.getRecipients(Message.RecipientType.TO)[1])
+                .getPersonal());
+    }
+
+    @Test
     void attachesFiles() throws Exception {
         Path file = Files.writeString(dir.resolve("notes.txt"), "notes");
         MimeMessage m = composer.build(session, new OutgoingMessage(account(), "bob@example.org", "", "", "s", "b",

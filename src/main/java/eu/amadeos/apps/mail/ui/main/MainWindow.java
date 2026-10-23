@@ -1,6 +1,7 @@
 package eu.amadeos.apps.mail.ui.main;
 
 import com.google.inject.Inject;
+import eu.amadeos.commons.contacts.ContactDirectory;
 import eu.amadeos.commons.i18n.LocaleSettings;
 import static eu.amadeos.commons.i18n.Texts.tr;
 
@@ -50,11 +51,13 @@ public final class MainWindow extends JFrame implements MainView {
     private int dividerLocation = 210;
 
     private final LocaleSettings locales;
+    private final ContactDirectory contacts;
 
     @Inject
-    public MainWindow(LocaleSettings locales) {
+    public MainWindow(LocaleSettings locales, ContactDirectory contacts) {
         super(tr("app.title"));
         this.locales = locales;
+        this.contacts = contacts;
         EdtExecutor.requireEdt();
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
         setIconImage(new ImageIcon(getClass().getResource("/icons/amade-mail.png")).getImage());
@@ -230,7 +233,7 @@ public final class MainWindow extends JFrame implements MainView {
 
     @Override
     public void openCompose(List<Account> accounts, Draft draft) {
-        ComposeWindow window = new ComposeWindow(accounts, draft, presenter::send);
+        ComposeWindow window = new ComposeWindow(accounts, draft, presenter::send, contacts, locales.locale());
         window.setIconImage(getIconImage());
         window.setVisible(true);
         window.focusBody();
