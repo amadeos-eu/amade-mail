@@ -8,7 +8,7 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
 ![Java](https://img.shields.io/badge/Java-25-orange)
 ![Debian](https://img.shields.io/badge/Debian-package-red)
 
-> Status: early development (0.1.0). Reading, deleting, moving and sending work; see *Roadmap*.
+> Status: early development. Reading, deleting, moving and sending work; see *Roadmap*.
 
 ---
 
@@ -168,7 +168,7 @@ Requirements: Java 25 JDK; `dpkg-deb` for the Debian package.
 ./gradlew test                 # unit tests (presenter tests need a display or Xvfb)
 ./gradlew run                  # start the mailer
 ./gradlew run --args="mailto:someone@example.org?subject=Hello"
-./gradlew deb                  # build/distributions/amade-mail_0.1.0_all.deb
+./gradlew deb                  # build/distributions/amade-mail_0.0.0~dev.0_all.deb
 ./gradlew installToAmadeOs     # copy the .deb into ../amadeos/config/packages.chroot/
 ```
 
