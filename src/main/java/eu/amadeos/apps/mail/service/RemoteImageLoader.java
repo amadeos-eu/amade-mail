@@ -1,5 +1,6 @@
 package eu.amadeos.apps.mail.service;
 
+import eu.amadeos.commons.net.Network;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ public class RemoteImageLoader {
     static final int MAX_IMAGES = 60;
     static final int MAX_BYTES = 5 * 1024 * 1024;
 
-    private final HttpClient client = HttpClient.newBuilder()
+    private final HttpClient client = Network.proxy().httpClient()
             .followRedirects(HttpClient.Redirect.NORMAL)
             .connectTimeout(Duration.ofSeconds(10))
             .build();
