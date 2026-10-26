@@ -7,6 +7,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import eu.amadeos.commons.desktop.PasswordStore;
 import eu.amadeos.commons.json.Json;
+import eu.amadeos.commons.net.Network;
 import eu.amadeos.apps.mail.domain.Account;
 import eu.amadeos.apps.mail.domain.OAuth2Client;
 import eu.amadeos.apps.mail.domain.OAuth2Provider;
@@ -315,7 +316,7 @@ public final class OAuth2Service {
     }
 
     private static FormPoster httpPoster() {
-        HttpClient http = HttpClient.newBuilder().connectTimeout(HTTP_TIMEOUT).build();
+        HttpClient http = Network.proxy().httpClient().connectTimeout(HTTP_TIMEOUT).build();
         return (uri, form) -> {
             HttpRequest request = HttpRequest.newBuilder(uri)
                     .timeout(HTTP_TIMEOUT)
