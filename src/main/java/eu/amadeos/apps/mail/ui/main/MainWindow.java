@@ -306,7 +306,7 @@ public final class MainWindow extends JFrame implements MainView {
     }
 
     void showAbout() {
-        JOptionPane.showMessageDialog(this, tr("about.text") + "\nhttps://github.com/datazuul/amade-mail",
+        JOptionPane.showMessageDialog(this, tr("about.text") + "\nhttps://github.com/amadeos-eu/amade-mail",
                 tr("menu.help.about"), JOptionPane.INFORMATION_MESSAGE, new ImageIcon(getIconImage()));
     }
 }
