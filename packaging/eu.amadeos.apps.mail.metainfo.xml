@@ -55,8 +55,8 @@
     <category>Email</category>
   </categories>
 
-  <url type="homepage">https://github.com/datazuul/amade-mail</url>
-  <url type="bugtracker">https://github.com/datazuul/amade-mail/issues</url>
+  <url type="homepage">https://github.com/amadeos-eu/amade-mail</url>
+  <url type="bugtracker">https://github.com/amadeos-eu/amade-mail/issues</url>
   <developer id="eu.amadeos">
     <name>amadeOS Project</name>
   </developer>
@@ -68,7 +68,7 @@
       <caption xml:lang="fr">La boîte de réception et un message</caption>
       <caption xml:lang="es">La bandeja de entrada y un mensaje</caption>
       <caption xml:lang="it">La posta in arrivo e un messaggio</caption>
-      <image>https://raw.githubusercontent.com/datazuul/amade-mail/main/docs/screenshots/amade-mail.png</image>
+      <image>https://raw.githubusercontent.com/amadeos-eu/amade-mail/main/docs/screenshots/amade-mail.png</image>
     </screenshot>
   </screenshots>
 

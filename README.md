@@ -1,6 +1,6 @@
 # amade-mail
 
-**amade-mail** is the Mailer of the [amadeOS](https://github.com/datazuul/amadeos) desktop: an
+**amade-mail** is the Mailer of the [amadeOS](https://github.com/amadeos-eu/amadeos) desktop: an
 IMAP/SMTP mail client in Java Swing, modelled on the CDE Mailer (`dtmail`) and extended with what a
 mail client needs today: a folder column for IMAP, several accounts and safe display of HTML mail.
 
@@ -44,7 +44,7 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
   *Open* and *Save As…*, *Message → Show Source*.
 - **Appointments in mail**: a message with the dtcm `** Calendar Appointment **` text or an `.ics`
   attachment shows a bar with *Schedule in Calendar*, which hands it to
-  [amade-calendar](https://github.com/datazuul/amade-calendar); files dropped on a compose window
+  [amade-calendar](https://github.com/amadeos-eu/amade-calendar); files dropped on a compose window
   become attachments, so the Calendar's *Drag Appt* icon works as it did with the CDE Mailer.
 - **Move menu** lists the folders of the selected message's account, as in dtmail.
 - **Mail Options** (*Mailbox → Mail Options…*) is one dialog with a *Category* menu:
@@ -55,7 +55,7 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
 - **Compose window**: From (account with colour), To, Cc, Bcc (*Format → Show Bcc Field*), Subject,
   attachments; *Reply to Sender*, *Reply to All*, *Forward*.
 - **Address completion**: while you type in To, Cc or Bcc, a list offers the matching people and
-  groups from the address books of [amade-contacts](https://github.com/datazuul/amade-contacts)
+  groups from the address books of [amade-contacts](https://github.com/amadeos-eu/amade-contacts)
   (any word of the name, the nickname or the address; "mull" finds "Müller"). Up and Down choose,
   Enter or Tab takes one; a group puts in all of its members.
 
@@ -139,9 +139,9 @@ a test checks that every translation is complete and that menu mnemonics stay un
 
 ## Architecture
 
-Java 25, Swing, Guice; same structure as [amade-pad](https://github.com/datazuul/amade-pad). Theme, Motif
+Java 25, Swing, Guice; same structure as [amade-pad](https://github.com/amadeos-eu/amade-pad). Theme, Motif
 look, start-up, keyring and XDG helpers come from
-[amade-commons](https://github.com/datazuul/amade-commons), so the Mailer follows the desktop theme
+[amade-commons](https://github.com/amadeos-eu/amade-commons), so the Mailer follows the desktop theme
 chosen in the Style Manager immediately, including *Dark Slate*.
 
 | Package | Content |
