@@ -2,6 +2,8 @@ package eu.amadeos.apps.mail.ui.main;
 
 import com.google.inject.Inject;
 import eu.amadeos.commons.contacts.ContactDirectory;
+import eu.amadeos.commons.desktop.Notification;
+import eu.amadeos.commons.desktop.Notifications;
 import eu.amadeos.commons.i18n.LocaleSettings;
 import static eu.amadeos.commons.i18n.Texts.tr;
 
@@ -39,6 +41,7 @@ import java.util.Map;
  * above the message view, as in the CDE Mailer.
  */
 public final class MainWindow extends JFrame implements MainView {
+    private long newMailNotification;
     private final FolderTreePanel folders = new FolderTreePanel();
     private final MessageListPanel list = new MessageListPanel();
     private final MessageViewPanel messageView;
@@ -145,6 +148,21 @@ public final class MainWindow extends JFrame implements MainView {
     public void showFolders(List<Account> accounts, Map<String, AccountState> states) {
         this.accounts = List.copyOf(accounts);
         folders.update(accounts, new HashMap<>(states));
+    }
+
+    @Override
+    public void announceNewMail(String account, int count, Runnable open) {
+        // One notification for new mail: a later check replaces it instead of piling up.
+        newMailNotification = Notifications.send(Notification.of(count == 1 ? tr("notify.new-mail.one") : tr("notify.new-mail.many", count))
+                .body(Notification.escape(account))
+                .icon(getIconImage())
+                .category("email.arrived")
+                .replacing(newMailNotification)
+                .defaultAction(() -> SwingUtilities.invokeLater(() -> {
+                    open.run();
+                    if (getState() == Frame.ICONIFIED) setState(Frame.NORMAL);
+                    toFront();
+                })));
     }
 
     @Override
