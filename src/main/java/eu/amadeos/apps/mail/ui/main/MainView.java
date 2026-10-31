@@ -20,6 +20,11 @@ public interface MainView {
 
     void selectFirstInbox();
 
+    /**
+     * A desktop notification: {@code count} new messages in the account; {@code open} (on the EDT) shows them.
+     */
+    void announceNewMail(String account, int count, Runnable open);
+
     void showMessages(List<MessageSummary> messages, boolean unified);
 
     void updateMessage(MessageSummary message);

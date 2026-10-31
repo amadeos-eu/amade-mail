@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -78,6 +79,25 @@ class MainPresenterTest {
         startWith(List.of(inbox, trash));
         verify(gateway).listFolders(account);
         verify(view).selectFirstInbox();
+    }
+
+    @Test
+    void aCheckThatFindsMoreUnreadMailInTheInboxAnnouncesIt() throws Exception {
+        Account complete = new Account("a1", "Privat", "Ralf", "ralf@example.org", "ralf",
+                new eu.amadeos.apps.mail.domain.ServerSettings("imap.example.org", 993,
+                        eu.amadeos.apps.mail.domain.ConnectionSecurity.TLS),
+                new eu.amadeos.apps.mail.domain.ServerSettings("smtp.example.org", 587,
+                        eu.amadeos.apps.mail.domain.ConnectionSecurity.STARTTLS), "", AccountColor.BLUE);
+        when(accountRepository.load()).thenReturn(List.of(complete));
+        when(preferencesRepository.load()).thenReturn(MailPreferences.DEFAULTS);
+        when(gateway.listFolders(complete)).thenReturn(List.of(inbox, trash));
+        onEdt(() -> presenter.start(List.of()));
+        verify(view, never()).announceNewMail(anyString(), anyInt(), any());
+        when(gateway.listFolders(complete)).thenReturn(List.of(folder("INBOX", FolderRole.INBOX, 3), folder("Trash", FolderRole.TRASH, 5)));
+        onEdt(presenter::checkMail);
+        verify(view).announceNewMail(eq("Privat"), eq(2), any());
+        onEdt(presenter::checkMail);
+        verify(view, times(1)).announceNewMail(anyString(), anyInt(), any());
     }
 
     @Test

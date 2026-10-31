@@ -51,7 +51,7 @@ mail client needs today: a folder column for IMAP, several accounts and safe dis
   - *Accounts*: list with Add / Remove / Move up / Move down; name, sender, IMAP and SMTP server
     (host, port, SSL/TLS or STARTTLS), user name, authentication (*Password* or *OAuth2 (Google)*),
     password, signature, colour; *Guess settings* from the address and *Test connection*.
-  - *Message View*: plain text or HTML by default, remote images, check interval.
+  - *Message View*: plain text or HTML by default, remote images, check interval. When a check finds new messages in an inbox, a desktop notification says how many; a click on it shows the inbox.
 - **Compose window**: From (account with colour), To, Cc, Bcc (*Format → Show Bcc Field*), Subject,
   attachments; *Reply to Sender*, *Reply to All*, *Forward*.
 - **Address completion**: while you type in To, Cc or Bcc, a list offers the matching people and

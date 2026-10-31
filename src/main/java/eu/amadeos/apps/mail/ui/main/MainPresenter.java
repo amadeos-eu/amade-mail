@@ -82,6 +82,8 @@ public final class MainPresenter implements MessageViewActions {
 
     private List<Account> accounts = List.of();
     private final Map<String, AccountState> states = new HashMap<>();
+    /** Unread messages in each account's inboxes at the last check, for the new mail notification. */
+    private final Map<String, Integer> inboxUnread = new HashMap<>();
     private MailPreferences preferences = MailPreferences.DEFAULTS;
     private boolean showHtml;
     private TreeItem current;
@@ -162,6 +164,7 @@ public final class MainPresenter implements MessageViewActions {
             async(() -> gateway.listFolders(account), folders -> {
                 if (account(account.id()).isEmpty()) return; // removed meanwhile
                 states.put(account.id(), AccountState.online(folders));
+                announceNewMail(account, folders);
                 view.showFolders(accounts, states);
                 if (!inboxSelected) {
                     inboxSelected = true;
@@ -176,6 +179,21 @@ public final class MainPresenter implements MessageViewActions {
         }
         view.showFolders(accounts, states);
     }
+
+    // --8<-- [start:new-mail]
+    /**
+     * Tells the desktop when an account's inboxes have more unread messages than at the last check. The first
+     * look at an account after the start only sets the count, so the start announces nothing.
+     */
+    private void announceNewMail(Account account, List<MailFolder> folders) {
+        int unread = folders.stream().filter(f -> f.role() == FolderRole.INBOX)
+                .mapToInt(f -> Math.max(0, f.unread())).sum();
+        Integer before = inboxUnread.put(account.id(), unread);
+        if (before != null && unread > before) {
+            view.announceNewMail(account.label(), unread - before, view::selectFirstInbox);
+        }
+    }
+    // --8<-- [end:new-mail]
 
     public void openOptions(String page, boolean addAccount) {
         view.openOptions(accounts, preferences, page, addAccount);
