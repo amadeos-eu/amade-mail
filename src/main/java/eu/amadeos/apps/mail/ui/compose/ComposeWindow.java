@@ -1,5 +1,6 @@
 package eu.amadeos.apps.mail.ui.compose;
 
+import eu.amadeos.commons.chars.SpecialCharacters;
 import static eu.amadeos.commons.i18n.Texts.tr;
 
 import eu.amadeos.apps.mail.domain.Account;
@@ -158,12 +159,12 @@ public final class ComposeWindow extends JFrame {
         content.setTransferHandler(drop);
         body.setTransferHandler(drop);
         attachmentList.setTransferHandler(drop);
-        setJMenuBar(menuBar());
+        setJMenuBar(menuBar(locale));
         pack();
         setLocationByPlatform(true);
     }
 
-    private JMenuBar menuBar() {
+    private JMenuBar menuBar(Locale locale) {
         JMenuBar bar = new JMenuBar();
         JMenu file = eu.amadeos.commons.i18n.Mnemonics.apply(new JMenu(), tr("compose.menu.file"));
         file.add(item(tr("compose.send"), KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, KeyEvent.CTRL_DOWN_MASK), this::send));
@@ -180,6 +181,7 @@ public final class ComposeWindow extends JFrame {
             revalidate();
         });
         format.add(showBcc);
+        SpecialCharacters.install(this, format, locale);
         bar.add(file);
         bar.add(attach);
         bar.add(format);
